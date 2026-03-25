@@ -3,12 +3,42 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello Cube</title>
+    <title>Mini Hands On Cube</title>
+    <link rel="icon" href="data:," />
     <link rel="stylesheet" href="style.css" />
+    <script src="./node_modules/cubejs/lib/cube.js"></script>
+    <script src="./node_modules/cubejs/lib/solve.js"></script>
     <script type="module" src="app.js"></script>
   </head>
+  <body>
+    <main class="app-shell">
+      <section class="scene-panel">
+        <div class="scene-copy">
+          <p class="eyebrow">Three.js Workshop</p>
+          <h1>Spin it, scramble it, solve it.</h1>
+          <p class="scene-description">
+            The original workshop cube has grown into a solver-backed Rubik's
+            Cube playground with a shared move queue and browser-friendly
+            debugging hooks.
+          </p>
+        </div>
+        <div id="container3D" aria-label="Interactive Rubik's Cube scene"></div>
+      </section>
 
-  <body style="background-color: rgb(38, 38, 38)">
-    <div id="container3D"></div>
+      <aside class="control-panel" aria-label="Rubik's Cube controls">
+        <section class="panel-section panel-intro">
+          <p class="eyebrow">Control Deck</p>
+          <h2>Queue every turn through one pipeline</h2>
+          <p>
+            Manual turns, random scrambles, and solver playback all use the
+            same quarter-turn animation flow.
+          </p>
+        </section>
+
+        <section class="panel-section" id="face-selector"></section>
+        <section class="panel-section" id="directional-pad"></section>
+        <section class="panel-section" id="utility-controls"></section>
+      </aside>
+    </main>
   </body>
 </html>
