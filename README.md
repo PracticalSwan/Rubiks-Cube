@@ -49,9 +49,16 @@ Mini_Hands_On_Cube/
 |   `-- UtilityControls.js
 |-- CHANGELOG.md
 |-- jest.config.cjs
+|-- LESSONS.md
 |-- tests/
 |   `-- mini-hands-on-cube/
-|       `-- CubeNotation.test.js
+|       |-- CubeNotation.test.js
+|       |-- Cubie.test.js
+|       |-- MoveSet.test.js
+|       |-- RubiksCube.test.js
+|       |-- SolverEngine.test.js
+|       |-- createRubiksCubeApp.test.js
+|       `-- ui-controls.test.js
 `-- package.json
 ```
 
@@ -118,6 +125,7 @@ The status label reports the app lifecycle clearly:
 
 - The solver path is intentionally adapter-based so browser-only imports stay at the edge of the app.
 - `cubejs` warm-up happens after the first render so initial paint stays fast.
+- The browser app loads `cubejs` from the locally served `node_modules/cubejs/lib/` scripts before `app.js` boots.
 - V1 solving is scoped to states produced by the app's own move and scramble pipeline.
 - Solver playback uses the same move queue as manual turns, which keeps animation behavior consistent.
 
