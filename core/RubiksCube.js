@@ -106,6 +106,15 @@ export class RubiksCube {
     return this.moveSet.hasWork();
   }
 
+  setFacelets(facelets) {
+    this.facelets = facelets;
+    this.syncCubiesFromFacelets();
+  }
+
+  reset() {
+    this.setFacelets(SOLVED_FACELETS);
+  }
+
   applyMove(move) {
     this.facelets = applyMoveToFacelets(this.facelets, move);
     this.syncCubiesFromFacelets();
@@ -218,7 +227,14 @@ export class RubiksCube {
 
     const info = getMoveInfo(queued.move);
     const pivot = this.createGroup();
-    pivot.rotation = pivot.rotation ?? { x: 0, y: 0, z: 0 };
+
+    if (!pivot.rotation) {
+      pivot.rotation = { x: 0, y: 0, z: 0 };
+    } else {
+      pivot.rotation.x ??= 0;
+      pivot.rotation.y ??= 0;
+      pivot.rotation.z ??= 0;
+    }
 
     const cubies = this.cubies.filter((cubie) =>
       cubie.belongsToLayer(info.axis, info.layer)
