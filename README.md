@@ -48,6 +48,10 @@ Mini_Hands_On_Cube/
 |   |-- DirectionalPad.js
 |   `-- UtilityControls.js
 |-- CHANGELOG.md
+|-- jest.config.cjs
+|-- tests/
+|   `-- mini-hands-on-cube/
+|       `-- CubeNotation.test.js
 `-- package.json
 ```
 
