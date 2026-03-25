@@ -1,0 +1,23 @@
+{
+  "name": "mini-hands-on-cube",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone Three.js cube workshop demo and Rubik's Cube planning sandbox.",
+  "scripts": {
+    "start": "http-server -p 8000 -c-1",
+    "start:no-overlay": "cross-env THREEJS_DEVTOOLS_NO_OVERLAY=true http-server -p 8000 -c-1",
+    "start:python": "python -m http.server 8000",
+    "start:python2": "python -m SimpleHTTPServer 8000"
+  },
+  "keywords": [
+    "threejs",
+    "webgl",
+    "workshop",
+    "rubiks-cube"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "http-server": "^14.1.1"
+  }
+}
