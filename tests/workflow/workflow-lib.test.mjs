@@ -1,3 +1,4 @@
+// Keeps the repository workflow rules under test so guardrails do not silently drift over time.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -5,6 +6,7 @@ async function loadWorkflowLib() {
   return import('../../scripts/workflow-lib.mjs');
 }
 
+// Workflow helpers are kept under test because the docs guardrails are easy to regress silently.
 test('slugifyTopic converts mixed input into a dated-doc slug', async () => {
   const { slugifyTopic } = await loadWorkflowLib();
 
@@ -35,6 +37,17 @@ test('getWorkflowGuardReport requires changelog and lessons for source changes',
   ]);
 });
 
+test('getWorkflowGuardReport skips runtime docs requirements for comment-only source edits', async () => {
+  const { getWorkflowGuardReport } = await loadWorkflowLib();
+
+  const report = getWorkflowGuardReport(['core/RubiksCube.js'], {
+    hasMeaningfulRuntimeChanges: false,
+  });
+
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.warnings, []);
+});
+
 test('getWorkflowGuardReport allows doc-only updates to pass quietly', async () => {
   const { getWorkflowGuardReport } = await loadWorkflowLib();
 
@@ -42,4 +55,27 @@ test('getWorkflowGuardReport allows doc-only updates to pass quietly', async () 
 
   assert.deepEqual(report.errors, []);
   assert.deepEqual(report.warnings, []);
+});
+
+test('hasMeaningfulChangedLines ignores comment-only patches but catches behavior changes', async () => {
+  const { hasMeaningfulChangedLines } = await loadWorkflowLib();
+
+  const commentOnlyPatch = [
+    'diff --git a/core/RubiksCube.js b/core/RubiksCube.js',
+    '--- a/core/RubiksCube.js',
+    '+++ b/core/RubiksCube.js',
+    '@@ -1,0 +1,1 @@',
+    '+// Explains why pivot groups are used during animation.',
+  ].join('\n');
+  const behaviorPatch = [
+    'diff --git a/core/RubiksCube.js b/core/RubiksCube.js',
+    '--- a/core/RubiksCube.js',
+    '+++ b/core/RubiksCube.js',
+    '@@ -10,1 +10,1 @@',
+    '-const value = 1;',
+    '+const value = 2;',
+  ].join('\n');
+
+  assert.equal(hasMeaningfulChangedLines('core/RubiksCube.js', commentOnlyPatch), false);
+  assert.equal(hasMeaningfulChangedLines('core/RubiksCube.js', behaviorPatch), true);
 });

@@ -1,6 +1,8 @@
+// Repository workflow verifier that checks required files, scripts, and docs guidance are present.
 import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+// Verification is intentionally file-based so workflow drift is caught even outside git hooks.
 const requiredPaths = [
   '.husky/post-checkout',
   '.husky/post-merge',
@@ -45,6 +47,7 @@ async function main() {
     process.exit(1);
   }
 
+  // Package scripts are part of the workflow contract, so they are verified alongside files.
   const packageJson = JSON.parse(await readFile(path.join(rootDir, 'package.json'), 'utf8'));
   const missingScripts = requiredScripts.filter((scriptName) => !(scriptName in packageJson.scripts));
 
@@ -66,6 +69,7 @@ async function main() {
 }
 
 main().catch((error) => {
+  // A hard failure is preferable here because partial workflow setup defeats the purpose of verification.
   console.error(`workflow:verify failed: ${error.message}`);
   process.exit(1);
 });

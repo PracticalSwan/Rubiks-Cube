@@ -1,19 +1,30 @@
+// Shared cube notation helpers for labels, move parsing, and facelet/cubie state conversion.
+// These tables keep UI-friendly color labels and solver-friendly face notation in one place.
 export const FACE_ORDER = ['U', 'R', 'F', 'D', 'L', 'B'];
 
-export const FACE_COLORS = {
-  U: '#f5f5f5',
-  R: '#d84f3f',
-  F: '#35b66a',
-  D: '#ffd45c',
-  L: '#ef8b34',
-  B: '#335fd1'
+export const FACE_DETAILS = {
+  U: { label: 'White', color: '#f5f5f5', buttonTint: 'rgba(245, 245, 245, 0.18)' },
+  R: { label: 'Red', color: '#d84f3f', buttonTint: 'rgba(216, 79, 63, 0.2)' },
+  F: { label: 'Green', color: '#35b66a', buttonTint: 'rgba(53, 182, 106, 0.2)' },
+  D: { label: 'Yellow', color: '#ffd45c', buttonTint: 'rgba(255, 212, 92, 0.2)' },
+  L: { label: 'Orange', color: '#ef8b34', buttonTint: 'rgba(239, 139, 52, 0.2)' },
+  B: { label: 'Blue', color: '#335fd1', buttonTint: 'rgba(51, 95, 209, 0.2)' }
 };
+
+export const FACE_LABELS = Object.fromEntries(
+  FACE_ORDER.map((face) => [face, FACE_DETAILS[face].label])
+);
+
+export const FACE_COLORS = Object.fromEntries(
+  FACE_ORDER.map((face) => [face, FACE_DETAILS[face].color])
+);
 
 export const MOVE_FACES = ['U', 'D', 'R', 'L', 'F', 'B'];
 
 export const SOLVED_FACELETS =
   'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB';
 
+// Normal vectors let us rotate stickers in 3D while still projecting back to face notation.
 const FACE_NORMALS = {
   U: [0, 1, 0],
   R: [1, 0, 0],
@@ -50,6 +61,7 @@ const MOVE_ROTATIONS = {
   B: 'zp'
 };
 
+// We precompute facelet metadata once because every move reuses the same 54 sticker slots.
 const INDEX_TO_META = buildIndexToMeta();
 
 function buildIndexToMeta() {
@@ -115,6 +127,7 @@ function getIndexFromMeta(meta) {
   }
 }
 
+// Layer checks keep move application data-driven instead of branching in the main loop.
 function isOnLayer(meta, move) {
   switch (move) {
     case 'U':
@@ -147,6 +160,7 @@ function rotateMeta(meta, move) {
   };
 }
 
+// A quarter turn is expressed as sticker remapping so cube state stays renderer-agnostic.
 function applyQuarterTurn(facelets, move) {
   const next = Array(54).fill(null);
 
@@ -168,6 +182,7 @@ export function normalizeMove(move) {
   return token;
 }
 
+// Algorithms can arrive as strings, nested arrays, or already-tokenized sequences from the UI/solver.
 export function parseAlgorithm(algorithm) {
   if (Array.isArray(algorithm)) {
     return algorithm.flatMap((entry) => parseAlgorithm(entry));
@@ -186,6 +201,82 @@ export function parseAlgorithm(algorithm) {
   return trimmed.split(/\s+/).map(normalizeMove);
 }
 
+function moveToQuarterTurns(move) {
+  const token = normalizeMove(move);
+
+  if (token.endsWith('2')) {
+    return 2;
+  }
+
+  if (token.endsWith("'")) {
+    return 3;
+  }
+
+  return 1;
+}
+
+function quarterTurnsToMove(face, turns) {
+  const normalizedTurns = ((turns % 4) + 4) % 4;
+
+  switch (normalizedTurns) {
+    case 0:
+      return null;
+    case 1:
+      return face;
+    case 2:
+      return `${face}2`;
+    case 3:
+      return `${face}'`;
+    default:
+      return null;
+  }
+}
+
+// Adjacent turns on the same face are collapsed so history and solve displays stay human-readable.
+export function simplifyAlgorithm(algorithm) {
+  const simplified = [];
+
+  parseAlgorithm(algorithm).forEach((move) => {
+    const previous = simplified[simplified.length - 1];
+
+    if (!previous || previous[0] !== move[0]) {
+      simplified.push(move);
+      return;
+    }
+
+    simplified.pop();
+    const mergedMove = quarterTurnsToMove(
+      move[0],
+      moveToQuarterTurns(previous) + moveToQuarterTurns(move)
+    );
+
+    if (mergedMove) {
+      simplified.push(mergedMove);
+    }
+  });
+
+  return simplified;
+}
+
+export function invertAlgorithm(algorithm) {
+  return parseAlgorithm(algorithm)
+    .slice()
+    .reverse()
+    .map((move) => {
+      if (move.endsWith('2')) {
+        return move;
+      }
+
+      return move.endsWith("'") ? move[0] : `${move[0]}'`;
+    });
+}
+
+export function formatAlgorithm(algorithm, fallback = 'No moves recorded yet.') {
+  const moves = parseAlgorithm(algorithm);
+  return moves.length ? moves.join(' ') : fallback;
+}
+
+// Facelet application helpers are the shared bridge between solver output and rendered cube state.
 export function applyMoveToFacelets(facelets, move) {
   const token = normalizeMove(move);
   let next = facelets;
@@ -226,6 +317,7 @@ export function getFaceletIndex(position, face) {
   }
 }
 
+// Each cubie only stores the stickers that are visible from its current grid position.
 export function createCubieStickerMap(facelets, position) {
   const stickers = {};
 

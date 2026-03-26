@@ -13,7 +13,11 @@
     "session:start": "node ./scripts/session-start.mjs",
     "workflow:guard": "node ./scripts/check-workflow-changes.mjs",
     "workflow:verify": "node ./scripts/verify-workflow.mjs",
-    "test": "node --test tests/workflow/*.test.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node --test tests/workflow/*.test.mjs tests/core/*.test.mjs",
     "verify": "npm run test && npm run workflow:verify"
   },
   "keywords": [
@@ -24,9 +28,13 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "cross-env": "^10.1.0",
+    "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
     "http-server": "^14.1.1",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "prettier": "^3.8.1"
   },
   "dependencies": {
     "cubejs": "^1.3.2"

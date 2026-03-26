@@ -1,5 +1,7 @@
+// Lightweight cubie model that keeps one visible sub-cube aligned with puzzle state and scene state.
 const DEFAULT_SPACING = 1.05;
 
+// A Cubie keeps puzzle state and mesh state traveling together as turns are applied.
 export class Cubie {
   constructor(logicalPosition, stickers, createMesh, { spacing } = {}) {
     this.logicalPosition = { ...logicalPosition };
@@ -15,6 +17,7 @@ export class Cubie {
   }
 
   syncTransform() {
+    // Grid coordinates are projected into centered scene coordinates here instead of at call sites.
     const { x, y, z } = this.currentPosition;
 
     this.mesh.position?.set?.(
@@ -36,6 +39,7 @@ export class Cubie {
   }
 
   setStickers(stickers) {
+    // The mesh never owns sticker truth; it only mirrors the latest cube state.
     this.stickers = { ...stickers };
     this.mesh.userData?.applyStickers?.(this.stickers);
   }

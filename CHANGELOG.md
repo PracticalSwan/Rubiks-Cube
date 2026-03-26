@@ -18,6 +18,7 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 - `scripts/check-session-workflow.mjs` to enforce staged updates for `CHANGELOG.md`, `LESSONS.md`, and `README.md` during major functional changes.
 - `check:readme` and `verify` scripts for local and hook-driven validation.
 - Local reminder hooks for session start and post-commit discipline.
+- Project-local ESLint and Prettier tooling plus local config files for JavaScript quality and formatting checks.
 
 ### Changed
 
@@ -27,11 +28,19 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 - Updated `pre-commit` to remind session startup reading of `LESSONS.md` and enforce README scope checks.
 - Updated `pre-commit` to enforce Serena/LESSONS/CHANGELOG/README workflow policy checks.
 - Updated `pre-push` to remind end-of-task documentation and run the full verify pipeline before allowing pushes.
+- Updated the workflow guard to treat comment-only runtime edits as non-behavioral so contributor docs are not blocked unnecessarily.
+- Removed deprecated Husky shim lines from local hook files to stay compatible with Husky v10.
 - Expanded local `.gitignore` with agent/tooling artifacts and common local cache/environment files.
 - Rewrote local `README.md` to remain strictly project-focused (no AI or workflow sections).
+- Swapped the face selector from cube notation to color names so guided turns match visible sticker colors.
+- Disabled wheel and pinch zoom, then added explicit `-` and `+` controls for camera distance changes.
+- Replaced lighting-driven sticker shading with flat materials so cube colors render without reflections or shadow tint shifts.
+- Upgraded `Randomize` to use `cubejs` random-state scrambles instead of a naive repeated-face filter.
+- Added history-aware solve selection, a move-set reveal panel, and a pre-solve restore button so solve playback is easier to inspect and undo.
 - Fixed `Stop`/playback cancellation handling so expected cancel flows update status without logging console errors.
 - Fixed stacked-layout scene sizing so tablet and mobile viewports keep the cube framed instead of letting the WebGL canvas balloon the panel height.
 - Refined the local testing plan with the standalone app URL, practical Playwright selector guidance, and the current Three.js DevTools bridge workflow.
+- Added local `lint`, `lint:fix`, `format`, and `format:check` scripts for day-to-day development in this standalone folder.
 
 ### Removed
 

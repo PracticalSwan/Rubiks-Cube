@@ -20,6 +20,12 @@
 - When a viewport screenshot looks wrong, inspect the DOM box metrics before assuming camera math is broken; the tablet framing regression here was caused by layout sizing, not by OrbitControls or camera projection.
 - Three.js DevTools can attach cleanly once the proxy targets the real app port; if the bridge comes up on the wrong target, use `set_dev_port` and reload instead of assuming the MCP is dead.
 
+## 2026-03-26 - Workflow guards should distinguish comments from behavior
+
+- File-name-only workflow guards overreport runtime changes when a commit only adds comments; inspect staged diff lines before requiring `LESSONS.md` or `CHANGELOG.md`.
+- For staged diffs, treat blank lines and comment-only additions in `.js`, `.mjs`, `.css`, and `.html` as documentation changes rather than behavioral changes.
+- Husky v9's loader shim lines are already deprecated and should be removed from local hook files before Husky v10 makes them fail outright.
+
 ## 2026-03-25 - Rubik's Cube solver implementation
 
 - Keep the cube state renderer-agnostic in `core/` so notation, move math, queueing, and solver orchestration stay testable without a browser canvas.

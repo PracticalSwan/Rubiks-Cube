@@ -1,16 +1,26 @@
+// Renders the selected-face turn controls and keeps manual move choices readable to non-cubers.
+import { FACE_LABELS } from '../core/CubeNotation.js';
+import { escapeHtml } from './escapeHtml.js';
+
+// The direction pad stays locked until a face is chosen so demo spin and manual intent never clash.
 export function renderDirectionalPad(container, props) {
   const { selectedFace, isBusy, onTurn } = props;
 
   if (!selectedFace) {
     container.innerHTML = `
       <h3>Turn controls</h3>
-      <p class="empty-copy">Pick a face to unlock the directional pad.</p>
+      <p class="empty-copy">
+        Choose a color to pause the demo spin and unlock turn controls.
+      </p>
     `;
     return;
   }
 
+  const faceLabel = FACE_LABELS[selectedFace] ?? selectedFace;
+
+  // The copy repeats the selected color so turns read like instructions, not cube notation drills.
   container.innerHTML = `
-    <h3>Turn ${selectedFace}</h3>
+    <h3>Turn ${escapeHtml(faceLabel)}</h3>
     <div class="direction-grid">
       <button
         type="button"
@@ -19,7 +29,7 @@ export function renderDirectionalPad(container, props) {
         ${isBusy ? 'disabled' : ''}
       >
         <span class="direction-title">Clockwise</span>
-        <span class="direction-copy">Play a standard ${selectedFace} turn.</span>
+        <span class="direction-copy">Play a standard ${escapeHtml(faceLabel)} turn.</span>
       </button>
       <button
         type="button"
@@ -28,11 +38,14 @@ export function renderDirectionalPad(container, props) {
         ${isBusy ? 'disabled' : ''}
       >
         <span class="direction-title">Counterclockwise</span>
-        <span class="direction-copy">Play ${selectedFace}' through the queue.</span>
+        <span class="direction-copy">
+          Play ${escapeHtml(faceLabel)} counterclockwise through the queue.
+        </span>
       </button>
     </div>
   `;
 
+  // Listeners are rebound on each render because the entire panel is replaced with fresh markup.
   container.querySelectorAll('[data-turn]').forEach((button) => {
     button.addEventListener('click', () =>
       onTurn(selectedFace, button.dataset.turn)

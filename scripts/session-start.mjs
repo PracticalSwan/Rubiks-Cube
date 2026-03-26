@@ -1,8 +1,10 @@
+// Session bootstrap script that scaffolds dated plan, handoff, and optional spec documents.
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { buildArtifactPaths, slugifyTopic } from './workflow-lib.mjs';
 
+// Template paths stay centralized so new workflow docs all originate from the same source files.
 const templateMap = {
   plan: 'docs/templates/implementation-plan-template.md',
   handoff: 'docs/templates/handoff-template.md',
@@ -26,6 +28,7 @@ async function ensureDirectories(rootDir) {
   );
 }
 
+// Session templates are lightweight placeholders, so token replacement is kept intentionally simple.
 function fillTemplate(templateText, topic, topicSlug, date) {
   return templateText
     .replaceAll('{{TOPIC}}', topic)
@@ -67,6 +70,7 @@ async function main() {
   const topicSlug = slugifyTopic(topic);
   const artifactPaths = buildArtifactPaths(date, topicSlug, includeSpec);
 
+  // Directories are created up front so the rest of the bootstrap can stay linear and predictable.
   await ensureDirectories(rootDir);
 
   const results = [];
@@ -93,6 +97,7 @@ async function main() {
 }
 
 main().catch((error) => {
+  // Bootstrap failures should stop the session early rather than creating half-written docs.
   console.error(`session:start failed: ${error.message}`);
   process.exit(1);
 });

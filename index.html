@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Static shell for the standalone cube app; runtime sections are filled by app.js. -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mini Hands On Cube</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="style.css" />
+    <!-- cubejs is loaded as browser globals before the ES module entrypoint boots. -->
     <script src="./node_modules/cubejs/lib/cube.js"></script>
     <script src="./node_modules/cubejs/lib/solve.js"></script>
+    <!-- app.js owns scene bootstrapping and renders the dynamic control panels. -->
     <script type="module" src="app.js"></script>
   </head>
   <body>
     <main class="app-shell">
+      <!-- The scene panel holds the WebGL canvas plus its fixed intro copy. -->
       <section class="scene-panel">
         <div class="scene-copy">
           <p class="eyebrow">Three.js Workshop</p>
@@ -25,6 +29,7 @@
         <div id="container3D" aria-label="Interactive Rubik's Cube scene"></div>
       </section>
 
+      <!-- Each control section is populated by small UI render helpers at runtime. -->
       <aside class="control-panel" aria-label="Rubik's Cube controls">
         <section class="panel-section panel-intro">
           <p class="eyebrow">Control Deck</p>

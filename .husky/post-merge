@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 echo "Mini Hands On Cube merge reminder:"
 echo "- Re-read CLAUDE.md and LESSONS.md after upstream changes"
 echo "- Refresh Serena context if the task changed"

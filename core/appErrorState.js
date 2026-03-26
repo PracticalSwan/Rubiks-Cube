@@ -1,3 +1,5 @@
+// Translates internal playback and solver failures into user-facing status messages.
+// Expected playback and solver failures are downgraded to status text so the UI stays calm.
 export function getActionErrorState(
   error,
   {

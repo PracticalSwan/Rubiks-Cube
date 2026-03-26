@@ -1,3 +1,4 @@
+// Core puzzle model that owns facelet truth, cubie instances, and animated turn playback.
 import {
   MOVE_FACES,
   SOLVED_FACELETS,
@@ -10,6 +11,7 @@ import {
 import { Cubie } from './Cubie.js';
 import { MoveSet } from './MoveSet.js';
 
+// Move metadata converts notation into an axis, layer, and signed quarter-turn angle.
 const MOVE_CONFIG = {
   U: { axis: 'y', layer: 2, angleSign: -1 },
   D: { axis: 'y', layer: 0, angleSign: 1 },
@@ -36,6 +38,7 @@ function createBatch(moves) {
   };
 }
 
+// Stop is modeled as a typed error so cancellation can be treated as expected control flow.
 function createCanceledError() {
   const error = new Error('Playback stopped');
   error.code = 'PLAYBACK_CANCELLED';
@@ -54,6 +57,7 @@ function getMoveInfo(move) {
   };
 }
 
+// RubiksCube owns the authoritative puzzle state and the animation queue that visualizes it.
 export class RubiksCube {
   constructor({
     createMesh,
@@ -73,6 +77,7 @@ export class RubiksCube {
   }
 
   build() {
+    // The cube is always a full 3x3x3 set of cubies; sticker visibility is derived per position.
     for (let x = 0; x < 3; x += 1) {
       for (let y = 0; y < 3; y += 1) {
         for (let z = 0; z < 3; z += 1) {
@@ -92,6 +97,7 @@ export class RubiksCube {
   }
 
   syncCubiesFromFacelets() {
+    // After each move, logical facelets stay the source of truth and every cubie rehydrates from them.
     this.cubies.forEach((cubie) => {
       cubie.setStickers(createCubieStickerMap(this.facelets, cubie.currentPosition));
       cubie.syncTransform();
@@ -158,6 +164,7 @@ export class RubiksCube {
       return Promise.resolve([]);
     }
 
+    // Batches let callers await a whole playback sequence instead of tracking individual turns.
     const batch = createBatch(tokens);
     this.pendingBatches.add(batch);
     this.moveSet.enqueueMany(tokens, batch);
@@ -169,6 +176,7 @@ export class RubiksCube {
   }
 
   cancelPlayback() {
+    // Cancellation resets transient pivot state first, then rejects any outstanding batch promises.
     const canceled = this.moveSet.cancel();
     const batches = new Set();
 
@@ -194,6 +202,7 @@ export class RubiksCube {
   }
 
   update(delta = 1 / 60) {
+    // The frame loop only advances one active move at a time so visual turns stay deterministic.
     if (!this.moveSet.isAnimating && this.moveSet.pendingMoves.length) {
       this.startNextAnimation();
     }
@@ -225,6 +234,7 @@ export class RubiksCube {
       return;
     }
 
+    // Rotating a temporary pivot is cheaper than recomputing each cubie's transform mid-turn.
     const info = getMoveInfo(queued.move);
     const pivot = this.createGroup();
 
@@ -255,6 +265,7 @@ export class RubiksCube {
   }
 
   completeActiveMove() {
+    // Once the visual turn finishes, the canonical facelet string is updated and the pivot is discarded.
     const activeMove = this.moveSet.complete();
 
     if (!activeMove) {
@@ -276,6 +287,7 @@ export class RubiksCube {
   }
 
   resetPivot(pivot, cubies = []) {
+    // Cubies are reattached to the main group so future turns always start from a clean hierarchy.
     if (!pivot) {
       return;
     }

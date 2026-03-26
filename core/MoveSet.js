@@ -1,3 +1,5 @@
+// Queue primitive used to serialize every animated move regardless of where it originated.
+// MoveSet is the single queue for manual turns, scrambles, and solver playback batches.
 export class MoveSet {
   constructor({ duration = 0.18 } = {}) {
     this.duration = duration;
@@ -23,6 +25,7 @@ export class MoveSet {
   }
 
   start(item, details = {}) {
+    // Per-move animation state is expanded once so the frame loop can stay allocation-light.
     this.activeMove = { ...item, progress: 0, ...details };
     this.isAnimating = true;
     return this.activeMove;
@@ -42,6 +45,7 @@ export class MoveSet {
   }
 
   cancel() {
+    // Cancel returns both active and queued work so higher layers can reject promises cleanly.
     const active = this.activeMove;
     const pending = this.clear();
 

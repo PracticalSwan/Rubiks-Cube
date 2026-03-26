@@ -1,7 +1,12 @@
+// Shared helpers for naming workflow artifacts and deciding when docs updates are required.
+// These path groups define what counts as runtime behavior versus workflow-only scaffolding.
 const runtimePrefixes = ['core/', 'ui/'];
 const runtimeFiles = ['app.js', 'index.html', 'style.css', 'package.json', 'package-lock.json'];
 const workflowPrefixes = ['.husky/', 'scripts/'];
 const workflowFiles = ['CLAUDE.md'];
+const SCRIPT_COMMENT_PATTERNS = [/^\/\//, /^\/\*/, /^\*/, /^\*\//];
+const CSS_COMMENT_PATTERNS = [/^\/\*/, /^\*/, /^\*\//];
+const HTML_COMMENT_PATTERNS = [/^<!--/, /^-->/];
 
 export function slugifyTopic(topic) {
   return topic
@@ -12,6 +17,7 @@ export function slugifyTopic(topic) {
     .replace(/-{2,}/g, '-');
 }
 
+// Artifact paths are generated centrally so plans, handoffs, and specs always share the same naming scheme.
 export function buildArtifactPaths(date, topicSlug, includeSpec = false) {
   return {
     plan: `docs/plans/${date}-${topicSlug}.md`,
@@ -24,9 +30,53 @@ function matchesAnyPath(filePath, exactFiles, prefixes) {
   return exactFiles.includes(filePath) || prefixes.some((prefix) => filePath.startsWith(prefix));
 }
 
-export function getWorkflowGuardReport(stagedFiles) {
-  const runtimeTouched = stagedFiles.some((filePath) => matchesAnyPath(filePath, runtimeFiles, runtimePrefixes));
-  const workflowTouched = stagedFiles.some((filePath) => matchesAnyPath(filePath, workflowFiles, workflowPrefixes));
+function getCommentPatterns(filePath) {
+  if (filePath.endsWith('.html')) {
+    return HTML_COMMENT_PATTERNS;
+  }
+
+  if (filePath.endsWith('.css')) {
+    return CSS_COMMENT_PATTERNS;
+  }
+
+  if (filePath.endsWith('.js') || filePath.endsWith('.mjs')) {
+    return SCRIPT_COMMENT_PATTERNS;
+  }
+
+  return [];
+}
+
+function isIgnorableChangedLine(filePath, line) {
+  const trimmed = line.trim();
+
+  if (!trimmed) {
+    return true;
+  }
+
+  return getCommentPatterns(filePath).some((pattern) => pattern.test(trimmed));
+}
+
+export function isRuntimePath(filePath) {
+  return matchesAnyPath(filePath, runtimeFiles, runtimePrefixes);
+}
+
+export function isWorkflowPath(filePath) {
+  return matchesAnyPath(filePath, workflowFiles, workflowPrefixes);
+}
+
+// Comment-only patches should not force runtime lessons/changelog updates when behavior did not change.
+export function hasMeaningfulChangedLines(filePath, patchText) {
+  return patchText
+    .split(/\r?\n/)
+    .filter((line) => /^[+-]/.test(line) && !/^(?:\+\+\+|---)/.test(line))
+    .some((line) => !isIgnorableChangedLine(filePath, line.slice(1)));
+}
+
+// The guard report separates blocking policy failures from softer documentation reminders.
+export function getWorkflowGuardReport(stagedFiles, { hasMeaningfulRuntimeChanges } = {}) {
+  const runtimeTouched = stagedFiles.some((filePath) => isRuntimePath(filePath));
+  const workflowTouched = stagedFiles.some((filePath) => isWorkflowPath(filePath));
+  const documentedRuntimeTouched = hasMeaningfulRuntimeChanges ?? runtimeTouched;
   const hasChangelog = stagedFiles.includes('CHANGELOG.md');
   const hasLessons = stagedFiles.includes('LESSONS.md');
   const hasPlanOrHandoff = stagedFiles.some(
@@ -36,15 +86,15 @@ export function getWorkflowGuardReport(stagedFiles) {
   const errors = [];
   const warnings = [];
 
-  if ((runtimeTouched || workflowTouched) && !hasChangelog) {
+  if ((documentedRuntimeTouched || workflowTouched) && !hasChangelog) {
     errors.push('Stage CHANGELOG.md whenever runtime or workflow files change.');
   }
 
-  if (runtimeTouched && !hasLessons) {
+  if (documentedRuntimeTouched && !hasLessons) {
     errors.push('Stage LESSONS.md whenever runtime behavior or implementation patterns change.');
   }
 
-  if ((runtimeTouched || workflowTouched) && !hasPlanOrHandoff) {
+  if ((documentedRuntimeTouched || workflowTouched) && !hasPlanOrHandoff) {
     warnings.push('No docs/plans or docs/handoffs file is staged. Consider leaving a handoff note for the next session.');
   }
 

@@ -1,3 +1,4 @@
+// Thin wrapper around cubejs that handles warm-up, error mapping, solving, and random-state scrambles.
 import { parseAlgorithm } from './CubeNotation.js';
 
 function mapSolverError(error) {
@@ -41,6 +42,8 @@ export class SolverEngine {
 
   async warm() {
     if (!this.warmPromise) {
+      // cubejs precomputes lookup tables; caching the promise avoids duplicate
+      // warm-up work when scramble and solve are clicked close together.
       this.warmPromise = Promise.resolve(this.CubeClass.initSolver()).then(() => {
         this.ready = true;
       });
@@ -67,6 +70,17 @@ export class SolverEngine {
       await this.warm();
       const cube = this.CubeClass.fromString(facelets);
       return parseAlgorithm(cube.solve());
+    } catch (error) {
+      throw mapSolverError(error);
+    }
+  }
+
+  async createRandomStateScramble() {
+    try {
+      await this.warm();
+      // Use cubejs random-state scrambles instead of ad-hoc turn shuffles so
+      // the generated positions reflect the real state space of the puzzle.
+      return parseAlgorithm(this.CubeClass.scramble());
     } catch (error) {
       throw mapSolverError(error);
     }
