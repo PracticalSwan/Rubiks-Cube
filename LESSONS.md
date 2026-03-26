@@ -1,10 +1,17 @@
 # Lessons
 
+## 2026-03-26 - Vite migration and vendored solver packaging
+
+- A raw vendored CommonJS folder can pass tests and builds yet still fail in Vite dev with `module is not defined`; wrapping it as a local file dependency gives Vite a package boundary it can prebundle reliably.
+- If a linked local CommonJS dependency must work in browser dev mode, add it to `optimizeDeps.include` so the browser never receives the raw CommonJS entrypoint.
+- Once the app depends on bare module imports, plain static servers are no longer valid development fallbacks; use Vite `dev` or `preview` for real verification.
+- Keep the heavy solver behind a cached dynamic import so the first render stays lighter while warmup still remains deterministic.
+
 ## 2026-03-26 - Lightweight agentic workflow bootstrap
 
 - Keep session automation inside the standalone cube folder so the workflow survives repo extraction without depending on root-only tooling.
 - Use hook automation for reminders and durable doc guards, not for user-facing runtime behavior.
-- Prefer lightweight Node scripts plus `node:test` for contributor workflow checks when the runtime app does not need a full test harness.
+- Prefer lightweight Node scripts plus the existing Vitest setup for workflow checks instead of introducing a second, parallel test harness.
 
 ## 2026-03-26 - README scope and workflow discipline
 
@@ -25,6 +32,11 @@
 - File-name-only workflow guards overreport runtime changes when a commit only adds comments; inspect staged diff lines before requiring `LESSONS.md` or `CHANGELOG.md`.
 - For staged diffs, treat blank lines and comment-only additions in `.js`, `.mjs`, `.css`, and `.html` as documentation changes rather than behavioral changes.
 - Husky v9's loader shim lines are already deprecated and should be removed from local hook files before Husky v10 makes them fail outright.
+
+## 2026-03-26 - Documentation and memory cleanup
+
+- Completed dated plans and handoffs become noise quickly; once their durable conclusions land in `README.md`, `CHANGELOG.md`, `LESSONS.md`, or Serena memory, remove the one-off files.
+- Serena memory stays more useful when it keeps stable project context only and drops task-specific pass logs, stale checkout notes, and unrelated preferences.
 
 ## 2026-03-25 - Rubik's Cube solver implementation
 

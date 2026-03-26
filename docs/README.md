@@ -1,6 +1,6 @@
-# Agentic Workflow
+# Contributor Workflow
 
-This folder holds contributor-only handoff material for `Mini_Hands_On_Cube`. Keep user-facing runtime guidance in `README.md`, stable reusable context in Serena memories, and durable technical takeaways in `LESSONS.md`.
+This folder holds contributor-only session material for `Mini_Hands_On_Cube`. Keep user-facing runtime guidance in `README.md`, stable reusable context in Serena memories, and durable technical takeaways in `LESSONS.md`.
 
 ## Sources Of Truth
 
@@ -15,11 +15,11 @@ This folder holds contributor-only handoff material for `Mini_Hands_On_Cube`. Ke
 ## Default Session Loop
 
 1. Read `CLAUDE.md`, `LESSONS.md`, and the Serena memories relevant to the task.
-2. Run `npm run session:start -- "<topic>"` to scaffold a dated plan and handoff note.
+2. Run `npm run session:start -- "<topic>"` when the task needs a dated plan and handoff trail.
 3. Add `--spec` when the change needs explicit requirements or trade-off capture.
 4. Implement the work while keeping `core/` renderer-agnostic and `app.js` as the browser edge.
 5. Run `npm run verify` and any task-specific runtime checks before wrapping up.
-6. Update `CHANGELOG.md`, `LESSONS.md`, and the matching handoff note when the change is durable.
+6. Update `CHANGELOG.md`, `LESSONS.md`, and Serena memory with the durable takeaways, then prune completed dated notes that no longer add value.
 
 ## Automation
 
@@ -30,9 +30,11 @@ This folder holds contributor-only handoff material for `Mini_Hands_On_Cube`. Ke
 
 ## Folder Map
 
-- `docs/specs/2026-03-26-agentic-workflow-spec.md` is the initial workflow requirements baseline.
-- `docs/plans/2026-03-26-agentic-workflow-bootstrap.md` records the bootstrap plan and reasoning.
-- `docs/handoffs/2026-03-26-agentic-workflow-bootstrap.md` captures the initial handoff state for future sessions.
+- `docs/templates/` stores reusable scaffolds for plans, specs, and handoffs.
+- `docs/plans/` stores active or in-progress implementation plans.
+- `docs/specs/` stores active requirements or problem-framing docs.
+- `docs/handoffs/` stores open session notes for the next contributor.
+- These dated folders may be empty between active sessions; keep them lean on purpose.
 
 ## Notes
 

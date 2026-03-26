@@ -6,7 +6,7 @@ import {
   applyMoveToFacelets,
   createCubieStickerMap,
   parseAlgorithm,
-  toFaceletString
+  toFaceletString,
 } from './CubeNotation.js';
 import { Cubie } from './Cubie.js';
 import { MoveSet } from './MoveSet.js';
@@ -18,7 +18,7 @@ const MOVE_CONFIG = {
   R: { axis: 'x', layer: 2, angleSign: -1 },
   L: { axis: 'x', layer: 0, angleSign: 1 },
   F: { axis: 'z', layer: 2, angleSign: -1 },
-  B: { axis: 'z', layer: 0, angleSign: 1 }
+  B: { axis: 'z', layer: 0, angleSign: 1 },
 };
 
 function createBatch(moves) {
@@ -34,7 +34,7 @@ function createBatch(moves) {
     remaining: moves.length,
     resolve,
     reject,
-    promise
+    promise,
   };
 }
 
@@ -53,18 +53,13 @@ function getMoveInfo(move) {
 
   return {
     ...config,
-    angle: config.angleSign * direction * turns * (Math.PI / 2)
+    angle: config.angleSign * direction * turns * (Math.PI / 2),
   };
 }
 
 // RubiksCube owns the authoritative puzzle state and the animation queue that visualizes it.
 export class RubiksCube {
-  constructor({
-    createMesh,
-    createGroup,
-    spacing = 1.05,
-    animationDuration = 0.18
-  }) {
+  constructor({ createMesh, createGroup, spacing = 1.05, animationDuration = 0.18 }) {
     this.createMesh = createMesh;
     this.createGroup = createGroup;
     this.spacing = spacing;
@@ -212,14 +207,10 @@ export class RubiksCube {
     }
 
     const activeMove = this.moveSet.activeMove;
-    activeMove.progress = Math.min(
-      1,
-      activeMove.progress + delta / activeMove.duration
-    );
+    activeMove.progress = Math.min(1, activeMove.progress + delta / activeMove.duration);
 
     if (activeMove.pivot) {
-      activeMove.pivot.rotation[activeMove.axis] =
-        activeMove.angle * activeMove.progress;
+      activeMove.pivot.rotation[activeMove.axis] = activeMove.angle * activeMove.progress;
     }
 
     if (activeMove.progress >= 1) {
@@ -246,9 +237,7 @@ export class RubiksCube {
       pivot.rotation.z ??= 0;
     }
 
-    const cubies = this.cubies.filter((cubie) =>
-      cubie.belongsToLayer(info.axis, info.layer)
-    );
+    const cubies = this.cubies.filter((cubie) => cubie.belongsToLayer(info.axis, info.layer));
 
     this.group.add?.(pivot);
 
@@ -260,7 +249,7 @@ export class RubiksCube {
     this.moveSet.start(queued, {
       ...info,
       cubies,
-      pivot
+      pivot,
     });
   }
 

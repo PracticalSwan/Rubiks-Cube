@@ -1,6 +1,4 @@
-// Covers solve-path selection so the UI keeps preferring short, inspectable playback sequences.
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import { expect, test } from 'vitest';
 
 import { chooseSolvePlan } from '../../core/SolvePlanner.js';
 
@@ -11,9 +9,9 @@ test('chooseSolvePlan prefers reversing simplified move history when it is short
     solverMoves: ['F', 'R', 'U', 'B'],
   });
 
-  assert.equal(plan.strategy, 'history');
-  assert.equal(plan.label, 'History-aware reverse');
-  assert.deepEqual(plan.moves, ["R'"]);
+  expect(plan.strategy).toBe('history');
+  expect(plan.label).toBe('History-aware reverse');
+  expect(plan.moves).toEqual(["R'"]);
 });
 
 test('chooseSolvePlan falls back to the solver result when history is not better', () => {
@@ -22,7 +20,7 @@ test('chooseSolvePlan falls back to the solver result when history is not better
     solverMoves: ['F'],
   });
 
-  assert.equal(plan.strategy, 'solver');
-  assert.equal(plan.label, 'cube.js two-phase');
-  assert.deepEqual(plan.moves, ['F']);
+  expect(plan.strategy).toBe('solver');
+  expect(plan.label).toBe('cube.js two-phase');
+  expect(plan.moves).toEqual(['F']);
 });

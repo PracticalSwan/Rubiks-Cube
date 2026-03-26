@@ -18,7 +18,7 @@ const commonGlobals = {
 
 export default [
   {
-    ignores: ['node_modules/**'],
+    ignores: ['dist/**', 'node_modules/**', 'vendor/**'],
   },
   js.configs.recommended,
   {

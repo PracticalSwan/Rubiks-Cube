@@ -89,9 +89,7 @@ export function renderUtilityControls(container, props) {
 
   // Event listeners are rebound after each render because the prior DOM subtree was replaced wholesale.
   container.querySelector('[data-action="reset"]').addEventListener('click', onReset);
-  container
-    .querySelector('[data-action="randomize"]')
-    .addEventListener('click', onRandomize);
+  container.querySelector('[data-action="randomize"]').addEventListener('click', onRandomize);
   container.querySelector('[data-action="solve"]').addEventListener('click', onSolve);
   container.querySelector('[data-action="moves"]').addEventListener('click', onToggleMoves);
   container.querySelector('[data-action="revert"]').addEventListener('click', onRevert);

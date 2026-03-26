@@ -23,8 +23,8 @@ async function fileExists(filePath) {
 async function ensureDirectories(rootDir) {
   await Promise.all(
     ['docs/plans', 'docs/specs', 'docs/handoffs', 'docs/templates'].map((relativeDir) =>
-      mkdir(path.join(rootDir, relativeDir), { recursive: true }),
-    ),
+      mkdir(path.join(rootDir, relativeDir), { recursive: true })
+    )
   );
 }
 
@@ -59,7 +59,10 @@ function printUsageAndExit() {
 async function main() {
   const args = process.argv.slice(2);
   const includeSpec = args.includes('--spec');
-  const topic = args.filter((arg) => arg !== '--spec').join(' ').trim();
+  const topic = args
+    .filter((arg) => arg !== '--spec')
+    .join(' ')
+    .trim();
 
   if (!topic) {
     printUsageAndExit();
@@ -75,7 +78,9 @@ async function main() {
 
   const results = [];
   results.push(await createArtifact(rootDir, 'plan', artifactPaths.plan, topic, topicSlug, date));
-  results.push(await createArtifact(rootDir, 'handoff', artifactPaths.handoff, topic, topicSlug, date));
+  results.push(
+    await createArtifact(rootDir, 'handoff', artifactPaths.handoff, topic, topicSlug, date)
+  );
 
   if (artifactPaths.spec) {
     results.push(await createArtifact(rootDir, 'spec', artifactPaths.spec, topic, topicSlug, date));
@@ -93,7 +98,9 @@ async function main() {
   console.log('- Read LESSONS.md for durable takeaways before editing.');
   console.log('- Read the Serena memories relevant to the task.');
   console.log('- Expand the generated plan/spec before changing source files.');
-  console.log('- Finish with npm run verify and update CHANGELOG.md, LESSONS.md, and the handoff note.');
+  console.log(
+    '- Finish with npm run verify and update CHANGELOG.md, LESSONS.md, and the handoff note.'
+  );
 }
 
 main().catch((error) => {

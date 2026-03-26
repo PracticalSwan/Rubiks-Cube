@@ -8,7 +8,7 @@ export const FACE_DETAILS = {
   F: { label: 'Green', color: '#35b66a', buttonTint: 'rgba(53, 182, 106, 0.2)' },
   D: { label: 'Yellow', color: '#ffd45c', buttonTint: 'rgba(255, 212, 92, 0.2)' },
   L: { label: 'Orange', color: '#ef8b34', buttonTint: 'rgba(239, 139, 52, 0.2)' },
-  B: { label: 'Blue', color: '#335fd1', buttonTint: 'rgba(51, 95, 209, 0.2)' }
+  B: { label: 'Blue', color: '#335fd1', buttonTint: 'rgba(51, 95, 209, 0.2)' },
 };
 
 export const FACE_LABELS = Object.fromEntries(
@@ -21,8 +21,7 @@ export const FACE_COLORS = Object.fromEntries(
 
 export const MOVE_FACES = ['U', 'D', 'R', 'L', 'F', 'B'];
 
-export const SOLVED_FACELETS =
-  'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB';
+export const SOLVED_FACELETS = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB';
 
 // Normal vectors let us rotate stickers in 3D while still projecting back to face notation.
 const FACE_NORMALS = {
@@ -31,7 +30,7 @@ const FACE_NORMALS = {
   F: [0, 0, 1],
   D: [0, -1, 0],
   L: [-1, 0, 0],
-  B: [0, 0, -1]
+  B: [0, 0, -1],
 };
 
 const FACE_BY_NORMAL = {
@@ -40,7 +39,7 @@ const FACE_BY_NORMAL = {
   '0,0,1': 'F',
   '0,-1,0': 'D',
   '-1,0,0': 'L',
-  '0,0,-1': 'B'
+  '0,0,-1': 'B',
 };
 
 const ROTATIONS = {
@@ -49,7 +48,7 @@ const ROTATIONS = {
   yp: ([x, y, z]) => [z, y, -x],
   yn: ([x, y, z]) => [-z, y, x],
   zp: ([x, y, z]) => [-y, x, z],
-  zn: ([x, y, z]) => [y, -x, z]
+  zn: ([x, y, z]) => [y, -x, z],
 };
 
 const MOVE_ROTATIONS = {
@@ -58,7 +57,7 @@ const MOVE_ROTATIONS = {
   R: 'xn',
   L: 'xp',
   F: 'zn',
-  B: 'zp'
+  B: 'zp',
 };
 
 // We precompute facelet metadata once because every move reuses the same 54 sticker slots.
@@ -156,7 +155,7 @@ function rotateMeta(meta, move) {
     face: FACE_BY_NORMAL[[nx, ny, nz].join(',')],
     x,
     y,
-    z
+    z,
   };
 }
 

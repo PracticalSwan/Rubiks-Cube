@@ -47,8 +47,6 @@ export function renderDirectionalPad(container, props) {
 
   // Listeners are rebound on each render because the entire panel is replaced with fresh markup.
   container.querySelectorAll('[data-turn]').forEach((button) => {
-    button.addEventListener('click', () =>
-      onTurn(selectedFace, button.dataset.turn)
-    );
+    button.addEventListener('click', () => onTurn(selectedFace, button.dataset.turn));
   });
 }

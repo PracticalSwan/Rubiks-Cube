@@ -7,6 +7,31 @@ const workflowFiles = ['CLAUDE.md'];
 const SCRIPT_COMMENT_PATTERNS = [/^\/\//, /^\/\*/, /^\*/, /^\*\//];
 const CSS_COMMENT_PATTERNS = [/^\/\*/, /^\*/, /^\*\//];
 const HTML_COMMENT_PATTERNS = [/^<!--/, /^-->/];
+const requiredWorkflowPaths = [
+  '.husky/post-checkout',
+  '.husky/post-merge',
+  '.husky/pre-commit',
+  '.husky/pre-push',
+  'docs/README.md',
+  'docs/specs',
+  'docs/plans',
+  'docs/handoffs',
+  'docs/templates/implementation-plan-template.md',
+  'docs/templates/spec-template.md',
+  'docs/templates/handoff-template.md',
+  'scripts/workflow-lib.mjs',
+  'scripts/session-start.mjs',
+  'scripts/check-workflow-changes.mjs',
+  'tests/workflow/workflow-lib.test.mjs',
+];
+const requiredWorkflowScripts = [
+  'prepare',
+  'session:start',
+  'workflow:guard',
+  'workflow:verify',
+  'test',
+  'verify',
+];
 
 export function slugifyTopic(topic) {
   return topic
@@ -23,6 +48,14 @@ export function buildArtifactPaths(date, topicSlug, includeSpec = false) {
     plan: `docs/plans/${date}-${topicSlug}.md`,
     handoff: `docs/handoffs/${date}-${topicSlug}.md`,
     spec: includeSpec ? `docs/specs/${date}-${topicSlug}.md` : null,
+  };
+}
+
+// Workflow verification should enforce reusable structure, not one fixed dated session snapshot.
+export function getWorkflowVerificationContract() {
+  return {
+    requiredPaths: [...requiredWorkflowPaths],
+    requiredScripts: [...requiredWorkflowScripts],
   };
 }
 
@@ -80,7 +113,7 @@ export function getWorkflowGuardReport(stagedFiles, { hasMeaningfulRuntimeChange
   const hasChangelog = stagedFiles.includes('CHANGELOG.md');
   const hasLessons = stagedFiles.includes('LESSONS.md');
   const hasPlanOrHandoff = stagedFiles.some(
-    (filePath) => filePath.startsWith('docs/plans/') || filePath.startsWith('docs/handoffs/'),
+    (filePath) => filePath.startsWith('docs/plans/') || filePath.startsWith('docs/handoffs/')
   );
 
   const errors = [];
@@ -95,7 +128,9 @@ export function getWorkflowGuardReport(stagedFiles, { hasMeaningfulRuntimeChange
   }
 
   if ((documentedRuntimeTouched || workflowTouched) && !hasPlanOrHandoff) {
-    warnings.push('No docs/plans or docs/handoffs file is staged. Consider leaving a handoff note for the next session.');
+    warnings.push(
+      'No docs/plans or docs/handoffs file is staged. Consider leaving a handoff note for the next session.'
+    );
   }
 
   return { errors, warnings };

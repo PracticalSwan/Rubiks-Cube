@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <!-- Static shell for the standalone cube app; runtime sections are filled by app.js. -->
@@ -7,10 +7,7 @@
     <title>Mini Hands On Cube</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="style.css" />
-    <!-- cubejs is loaded as browser globals before the ES module entrypoint boots. -->
-    <script src="./node_modules/cubejs/lib/cube.js"></script>
-    <script src="./node_modules/cubejs/lib/solve.js"></script>
-    <!-- app.js owns scene bootstrapping and renders the dynamic control panels. -->
+    <!-- app.js now boots the full scene through Vite-managed modules. -->
     <script type="module" src="app.js"></script>
   </head>
   <body>
@@ -21,9 +18,8 @@
           <p class="eyebrow">Three.js Workshop</p>
           <h1>Spin it, scramble it, solve it.</h1>
           <p class="scene-description">
-            The original workshop cube has grown into a solver-backed Rubik's
-            Cube playground with a shared move queue and browser-friendly
-            debugging hooks.
+            The original workshop cube has grown into a solver-backed Rubik's Cube playground with a
+            shared move queue and browser-friendly debugging hooks.
           </p>
         </div>
         <div id="container3D" aria-label="Interactive Rubik's Cube scene"></div>
@@ -35,8 +31,8 @@
           <p class="eyebrow">Control Deck</p>
           <h2>Queue every turn through one pipeline</h2>
           <p>
-            Manual turns, random scrambles, and solver playback all use the
-            same quarter-turn animation flow.
+            Manual turns, random scrambles, and solver playback all use the same quarter-turn
+            animation flow.
           </p>
         </section>
 

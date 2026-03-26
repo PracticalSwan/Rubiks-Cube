@@ -1,6 +1,6 @@
 // Main browser entrypoint that wires the Three.js scene, solver services, and DOM controls together.
-import * as THREE from 'https://cdn.skypack.dev/three@0.129.0/build/three.module.js';
-import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {
   FACE_COLORS,
   FACE_LABELS,
@@ -9,6 +9,7 @@ import {
 } from './core/CubeNotation.js';
 import { getActionErrorState } from './core/appErrorState.js';
 import { RubiksCube } from './core/RubiksCube.js';
+import { loadCubeClass } from './core/loadCubeClass.js';
 import { SolverEngine } from './core/SolverEngine.js';
 import { chooseSolvePlan } from './core/SolvePlanner.js';
 import { createRubiksCubeApp } from './core/createRubiksCubeApp.js';
@@ -22,8 +23,6 @@ const container = document.getElementById('container3D');
 const faceSelector = document.getElementById('face-selector');
 const directionalPad = document.getElementById('directional-pad');
 const utilityControls = document.getElementById('utility-controls');
-const CubeClass = globalThis.Cube;
-
 // Scene and camera stay intentionally simple so the sticker colors are always read accurately.
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -81,7 +80,7 @@ const rubiksCube = new RubiksCube({
 });
 scene.add(rubiksCube.group);
 
-const solverEngine = new SolverEngine({ CubeClass });
+const solverEngine = new SolverEngine({});
 
 // Shared app state keeps scene motion, solve history, and UI affordances in sync.
 const state = {
@@ -90,7 +89,7 @@ const state = {
   isBusy: false,
   isOrbiting: false,
   solverReady: false,
-  status: CubeClass ? 'Warming solver' : 'cubejs did not load',
+  status: 'Loading solver',
   historyMoves: [],
   lastSolvePlan: null,
   lastSolveSnapshot: null,
@@ -107,8 +106,7 @@ const app = createRubiksCubeApp({
 });
 
 function syncIdleSpinState() {
-  state.idleSpinEnabled =
-    !state.isBusy && !state.isOrbiting && !state.selectedFace;
+  state.idleSpinEnabled = !state.isBusy && !state.isOrbiting && !state.selectedFace;
 }
 
 function setHistoryMoves(nextMoves) {
@@ -386,13 +384,11 @@ async function handleSolve() {
 }
 
 function warmSolver() {
-  if (!CubeClass) {
-    renderControls();
-    return;
-  }
-
-  solverEngine
-    .warmInIdle()
+  loadCubeClass()
+    .then((CubeClass) => {
+      solverEngine.setCubeClass(CubeClass);
+      return solverEngine.warmInIdle();
+    })
     .then(() => {
       state.solverReady = true;
 
@@ -403,7 +399,7 @@ function warmSolver() {
     })
     .catch((error) => {
       console.error(error);
-      state.status = 'Solver warm-up failed';
+      state.status = 'Solver failed to load';
       renderControls();
     });
 }

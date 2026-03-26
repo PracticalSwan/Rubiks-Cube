@@ -1,27 +1,7 @@
 // Repository workflow verifier that checks required files, scripts, and docs guidance are present.
 import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
-
-// Verification is intentionally file-based so workflow drift is caught even outside git hooks.
-const requiredPaths = [
-  '.husky/post-checkout',
-  '.husky/post-merge',
-  '.husky/pre-commit',
-  '.husky/pre-push',
-  'docs/README.md',
-  'docs/specs/2026-03-26-agentic-workflow-spec.md',
-  'docs/plans/2026-03-26-agentic-workflow-bootstrap.md',
-  'docs/handoffs/2026-03-26-agentic-workflow-bootstrap.md',
-  'docs/templates/implementation-plan-template.md',
-  'docs/templates/spec-template.md',
-  'docs/templates/handoff-template.md',
-  'scripts/workflow-lib.mjs',
-  'scripts/session-start.mjs',
-  'scripts/check-workflow-changes.mjs',
-  'tests/workflow/workflow-lib.test.mjs',
-];
-
-const requiredScripts = ['prepare', 'session:start', 'workflow:guard', 'workflow:verify', 'test', 'verify'];
+import { getWorkflowVerificationContract } from './workflow-lib.mjs';
 
 async function assertPathExists(rootDir, relativePath) {
   await access(path.join(rootDir, relativePath));
@@ -30,6 +10,7 @@ async function assertPathExists(rootDir, relativePath) {
 async function main() {
   const rootDir = process.cwd();
   const missingPaths = [];
+  const { requiredPaths, requiredScripts } = getWorkflowVerificationContract();
 
   for (const relativePath of requiredPaths) {
     try {
@@ -49,7 +30,9 @@ async function main() {
 
   // Package scripts are part of the workflow contract, so they are verified alongside files.
   const packageJson = JSON.parse(await readFile(path.join(rootDir, 'package.json'), 'utf8'));
-  const missingScripts = requiredScripts.filter((scriptName) => !(scriptName in packageJson.scripts));
+  const missingScripts = requiredScripts.filter(
+    (scriptName) => !(scriptName in packageJson.scripts)
+  );
 
   if (missingScripts.length > 0) {
     console.error('workflow:verify missing required package scripts:');

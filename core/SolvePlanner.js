@@ -25,15 +25,11 @@ export function chooseSolvePlan({ historyMoves = [], solverMoves = [] }) {
   const normalizedSolver = parseAlgorithm(solverMoves);
 
   if (reverseHistory.length) {
-    candidates.push(
-      createCandidate('history', 'History-aware reverse', reverseHistory)
-    );
+    candidates.push(createCandidate('history', 'History-aware reverse', reverseHistory));
   }
 
   if (normalizedSolver.length) {
-    candidates.push(
-      createCandidate('solver', 'cube.js two-phase', normalizedSolver)
-    );
+    candidates.push(createCandidate('solver', 'cube.js two-phase', normalizedSolver));
   }
 
   if (!candidates.length) {

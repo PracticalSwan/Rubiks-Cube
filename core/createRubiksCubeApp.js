@@ -5,7 +5,7 @@ export function createRubiksCubeApp({
   renderer,
   scene,
   camera,
-  shouldAutoSpin = () => true
+  shouldAutoSpin = () => true,
 }) {
   // Keep zoom behavior button-driven so orbit rotation remains usable without wheel or pinch scaling.
   const clampDistance = (distance) =>
@@ -24,9 +24,7 @@ export function createRubiksCubeApp({
     }
 
     camera.position.copy(
-      controls.target
-        .clone()
-        .add(currentOffset.normalize().multiplyScalar(clampedDistance))
+      controls.target.clone().add(currentOffset.normalize().multiplyScalar(clampedDistance))
     );
     controls.update();
     return true;

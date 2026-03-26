@@ -11,18 +11,21 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 - Local `docs/` workflow scaffold with protected `plans`, `specs`, `handoffs`, and reusable templates.
 - `scripts/session-start.mjs` to scaffold dated plan, spec, and handoff artifacts for new sessions.
 - `scripts/check-workflow-changes.mjs` and `scripts/verify-workflow.mjs` for commit-time and verification-time workflow checks.
-- Lightweight `node:test` coverage for the shared workflow helper module.
+- Project-local ESLint, Prettier, Vitest, and Vite tooling plus matching config files.
+- Runtime dependency coverage for the Vite migration seam, including `loadCubeClass()` and the local solver package.
+- Local vendored `cubejs` package under `vendor/cubejs` plus `core/loadCubeClass.js` for lazy solver bootstrapping.
+- Detailed Vite production/testing plan and handoff notes in `docs/plans/` and `docs/handoffs/`.
 - Husky `post-checkout`, `post-merge`, `pre-commit`, and `pre-push` hooks for session reminders and verification.
 - Husky-based git hook workflow via `prepare` script and `.husky` hook files.
 - `scripts/check-readme-against-gitignore.mjs` to block README content that references ignored paths.
 - `scripts/check-session-workflow.mjs` to enforce staged updates for `CHANGELOG.md`, `LESSONS.md`, and `README.md` during major functional changes.
 - `check:readme` and `verify` scripts for local and hook-driven validation.
 - Local reminder hooks for session start and post-commit discipline.
-- Project-local ESLint and Prettier tooling plus local config files for JavaScript quality and formatting checks.
 
 ### Changed
 
-- Reintroduced lightweight contributor automation in `package.json` with `prepare`, `session:start`, `test`, and `verify` scripts while keeping the runtime start commands intact.
+- Cleaned contributor docs so the current Vite and Vitest workflow is the only documented path, including removal of stale Python fallback references from local instructions.
+- Reintroduced lightweight contributor automation in `package.json` with `prepare`, `session:start`, and `verify` scripts while keeping the runtime start commands intact.
 - Expanded local `CLAUDE.md` so new sessions have an explicit bootstrap path and protected-doc boundaries inside the standalone project.
 - Ignored Husky's generated support folder so the repo only needs the authored hook files.
 - Updated `pre-commit` to remind session startup reading of `LESSONS.md` and enforce README scope checks.
@@ -32,6 +35,9 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 - Removed deprecated Husky shim lines from local hook files to stay compatible with Husky v10.
 - Expanded local `.gitignore` with agent/tooling artifacts and common local cache/environment files.
 - Rewrote local `README.md` to remain strictly project-focused (no AI or workflow sections).
+- Migrated the app shell to Vite for dev, build, and preview instead of the previous static-server workflow.
+- Replaced Skypack Three.js imports and browser-global `cubejs` script tags with npm-managed `three` imports and a lazily loaded local `cubejs-local` package.
+- Migrated the local automated test suite to Vitest and expanded the verify pipeline to include the production build.
 - Swapped the face selector from cube notation to color names so guided turns match visible sticker colors.
 - Disabled wheel and pinch zoom, then added explicit `-` and `+` controls for camera distance changes.
 - Replaced lighting-driven sticker shading with flat materials so cube colors render without reflections or shadow tint shifts.
@@ -40,13 +46,14 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 - Fixed `Stop`/playback cancellation handling so expected cancel flows update status without logging console errors.
 - Fixed stacked-layout scene sizing so tablet and mobile viewports keep the cube framed instead of letting the WebGL canvas balloon the panel height.
 - Refined the local testing plan with the standalone app URL, practical Playwright selector guidance, and the current Three.js DevTools bridge workflow.
-- Added local `lint`, `lint:fix`, `format`, and `format:check` scripts for day-to-day development in this standalone folder.
+- Confirmed the migrated app through headed Playwright flows, responsive checks, and Three.js DevTools inspection with zero blocking browser-console errors.
 
 ### Removed
 
-- Local Jest test harness, test files, and Jest config so the folder now ships as a lean runtime-only app.
-- Agent/workflow hook files and helper scripts that were only needed for AI-assisted session discipline.
-- Planning and spec documents that were useful during implementation but are not required to run or use the project.
+- Completed dated plans, specs, and handoff notes from `docs/` after folding their durable guidance into `README.md`, `LESSONS.md`, and Serena memory.
+- Legacy Python static-server scripts that cannot serve the Vite module graph correctly.
+- Browser-global dependency loading for Three.js and `cubejs`.
+- The old Jest-based test harness.
 
 ## [2026-03-25]
 

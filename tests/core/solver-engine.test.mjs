@@ -1,6 +1,4 @@
-// Covers solver warm-up reuse and random-state scramble parsing without pulling in browser runtime code.
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import { expect, test } from 'vitest';
 
 import { SolverEngine } from '../../core/SolverEngine.js';
 
@@ -25,6 +23,6 @@ test('createRandomStateScramble warms the solver and parses the returned scrambl
 
   const scramble = await engine.createRandomStateScramble();
 
-  assert.equal(warmCount, 1);
-  assert.deepEqual(scramble, ['R', 'U2', "F'"]);
+  expect(warmCount).toBe(1);
+  expect(scramble).toEqual(['R', 'U2', "F'"]);
 });

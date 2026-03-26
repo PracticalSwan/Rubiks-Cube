@@ -9,8 +9,7 @@ export class MoveSet {
   }
 
   enqueue(move, batch = null) {
-    const item =
-      typeof move === 'string' ? { move, batch, duration: this.duration } : move;
+    const item = typeof move === 'string' ? { move, batch, duration: this.duration } : move;
 
     this.pendingMoves.push(item);
     return item;

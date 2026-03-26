@@ -28,7 +28,7 @@ export class SolverEngine {
       }
 
       return setTimeout(callback, 0);
-    }
+    },
   }) {
     this.CubeClass = CubeClass;
     this.scheduleIdle = scheduleIdle;
@@ -36,15 +36,37 @@ export class SolverEngine {
     this.ready = false;
   }
 
+  setCubeClass(CubeClass) {
+    if (this.CubeClass === CubeClass) {
+      return;
+    }
+
+    this.CubeClass = CubeClass;
+    this.warmPromise = null;
+    this.ready = false;
+  }
+
+  getCubeClass() {
+    if (!this.CubeClass) {
+      const missingSolverError = new Error('Solver unavailable');
+      missingSolverError.code = 'SOLVER_UNAVAILABLE';
+      throw missingSolverError;
+    }
+
+    return this.CubeClass;
+  }
+
   isReady() {
     return this.ready;
   }
 
   async warm() {
+    const CubeClass = this.getCubeClass();
+
     if (!this.warmPromise) {
       // cubejs precomputes lookup tables; caching the promise avoids duplicate
       // warm-up work when scramble and solve are clicked close together.
-      this.warmPromise = Promise.resolve(this.CubeClass.initSolver()).then(() => {
+      this.warmPromise = Promise.resolve(CubeClass.initSolver()).then(() => {
         this.ready = true;
       });
     }
@@ -68,7 +90,7 @@ export class SolverEngine {
   async solve(facelets) {
     try {
       await this.warm();
-      const cube = this.CubeClass.fromString(facelets);
+      const cube = this.getCubeClass().fromString(facelets);
       return parseAlgorithm(cube.solve());
     } catch (error) {
       throw mapSolverError(error);
@@ -80,7 +102,7 @@ export class SolverEngine {
       await this.warm();
       // Use cubejs random-state scrambles instead of ad-hoc turn shuffles so
       // the generated positions reflect the real state space of the puzzle.
-      return parseAlgorithm(this.CubeClass.scramble());
+      return parseAlgorithm(this.getCubeClass().scramble());
     } catch (error) {
       throw mapSolverError(error);
     }

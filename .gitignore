@@ -15,4 +15,7 @@ pnpm-debug.log*
 *.tmp
 
 CLAUDE.md
+AGENTS.md
 .husky/_/
+.agents
+.serena/
