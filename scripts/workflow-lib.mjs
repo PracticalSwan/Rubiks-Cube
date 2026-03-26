@@ -124,9 +124,7 @@ export function getWorkflowGuardReport(stagedFiles, { hasMeaningfulRuntimeChange
   }
 
   if (documentedRuntimeTouched && !hasLessons) {
-    warnings.push(
-      'Consider staging LESSONS.md to capture any runtime or implementation learnings.'
-    );
+    errors.push('Stage LESSONS.md whenever runtime behavior or implementation patterns change.');
   }
 
   if ((documentedRuntimeTouched || workflowTouched) && !hasPlanOrHandoff) {

@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest';
 
+import { applyAlgorithmToFacelets, SOLVED_FACELETS } from '../../core/CubeNotation.js';
 import { chooseSolvePlan } from '../../core/SolvePlanner.js';
 
 // The planner should prefer the most inspectable short path, not just whatever the solver returns first.
@@ -23,4 +24,16 @@ test('chooseSolvePlan falls back to the solver result when history is not better
   expect(plan.strategy).toBe('solver');
   expect(plan.label).toBe('cube.js two-phase');
   expect(plan.moves).toEqual(['F']);
+});
+
+test('chooseSolvePlan ignores stale history when the current cube state no longer matches it', () => {
+  const plan = chooseSolvePlan({
+    currentFacelets: applyAlgorithmToFacelets(SOLVED_FACELETS, ['U']),
+    historyMoves: ['R'],
+    solverMoves: ["U'"],
+  });
+
+  expect(plan.strategy).toBe('solver');
+  expect(plan.label).toBe('cube.js two-phase');
+  expect(plan.moves).toEqual(["U'"]);
 });

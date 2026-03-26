@@ -26,6 +26,11 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 
 ### Changed
 
+- Removed the hero paragraph from the scene copy so the intro card stays tighter and no longer repeats the longer workshop summary.
+- Relaxed the orbit camera limits so the cube can be dragged fully above and below instead of stopping early on vertical movement.
+- Tightened the desktop shell spacing, panel sizing, and initial camera framing so the scene and control deck fit the viewport without a page-height overflow while mobile still stacks normally.
+- Preserved cumulative move history across repeated random-state scrambles and validated history against the live facelet state before preferring reverse-history solves, so `Solve` now finishes cleanly after multiple randomizes.
+- Updated the workflow guard so missing `LESSONS.md` stays a blocking error for meaningful runtime changes, matching the documented repo policy and tests.
 - Expanded `README.md` with contribution, conduct, security, and license references while keeping runtime setup and usage as the primary focus.
 - Added `author`, `repository`, `bugs`, and `homepage` metadata to `package.json`.
 - Cleaned contributor docs so the current Vite and Vitest workflow is the only documented path, including removal of stale Python fallback references from local instructions.

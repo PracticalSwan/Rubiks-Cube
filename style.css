@@ -66,10 +66,12 @@ button:focus-visible {
 /* The shell favors a wide scene on desktop, then collapses to one column on smaller screens. */
 .app-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 420px);
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 380px);
+  height: 100dvh;
   min-height: 100vh;
-  gap: 24px;
-  padding: 24px;
+  gap: 20px;
+  padding: 20px;
+  overflow: hidden;
 }
 
 .scene-panel,
@@ -102,11 +104,11 @@ button:focus-visible {
 
 .scene-copy {
   position: absolute;
-  top: 28px;
-  left: 28px;
+  top: 24px;
+  left: 24px;
   z-index: 1;
-  max-width: 420px;
-  padding: 20px 22px;
+  max-width: 360px;
+  padding: 18px 20px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-lg);
   background: rgba(4, 10, 18, 0.56);
@@ -116,8 +118,8 @@ button:focus-visible {
 .scene-copy h1,
 .panel-intro h2 {
   margin: 0;
-  font-size: clamp(2rem, 3vw, 3.4rem);
-  line-height: 0.94;
+  font-size: clamp(1.8rem, 2.6vw, 3rem);
+  line-height: 0.96;
   letter-spacing: -0.04em;
 }
 
@@ -153,12 +155,14 @@ button:focus-visible {
 /* Control cards reuse one spacing and surface system so added panels blend in automatically. */
 .control-panel {
   display: grid;
-  gap: 18px;
+  gap: 14px;
   align-content: start;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .panel-section {
-  padding: 20px;
+  padding: 16px 18px;
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-lg);
   background: var(--panel);
@@ -167,14 +171,14 @@ button:focus-visible {
 }
 
 .panel-section h3 {
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   font-size: 1rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .panel-intro h2 {
-  font-size: clamp(1.6rem, 2vw, 2.4rem);
+  font-size: clamp(1.45rem, 1.8vw, 2rem);
 }
 
 .panel-intro p {
@@ -184,7 +188,7 @@ button:focus-visible {
 .face-grid,
 .utility-grid {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .face-grid {
@@ -198,15 +202,15 @@ button:focus-visible {
 .direction-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 /* Buttons share a common interaction model, with action-specific accents layered on top later. */
 .control-button,
 .face-button,
 .direction-button {
-  min-height: 52px;
-  padding: 14px 16px;
+  min-height: 48px;
+  padding: 12px 14px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
   color: var(--text-main);
@@ -259,7 +263,7 @@ button:focus-visible {
 }
 
 .direction-button {
-  min-height: 64px;
+  min-height: 56px;
   text-align: left;
 }
 
@@ -273,7 +277,8 @@ button:focus-visible {
 .direction-copy {
   display: block;
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
 }
 
 .control-button[data-action='solve'] {
@@ -307,8 +312,8 @@ button:focus-visible {
 /* Utility-only surfaces separate zoom and solve metadata from the main action grid. */
 .zoom-strip,
 .move-plan {
-  margin-top: 16px;
-  padding: 14px 16px;
+  margin-top: 14px;
+  padding: 12px 14px;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.05);
 }
@@ -371,8 +376,8 @@ button:focus-visible {
 }
 
 .status-block {
-  margin-top: 16px;
-  padding: 14px 16px;
+  margin-top: 14px;
+  padding: 12px 14px;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.05);
 }
@@ -398,11 +403,15 @@ button:focus-visible {
 /* Responsive rules prioritize keeping the cube visible before preserving the desktop arrangement. */
 @media (max-width: 1080px) {
   .app-shell {
+    height: auto;
     grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 18px;
+    overflow: visible;
   }
 
   .scene-panel {
-    min-height: 60vh;
+    min-height: 56vh;
   }
 
   .scene-copy {
@@ -412,16 +421,22 @@ button:focus-visible {
     margin: 20px;
     max-width: none;
   }
+
+  .control-panel {
+    overflow: visible;
+    padding-right: 0;
+  }
 }
 
 @media (max-width: 640px) {
   .app-shell {
     padding: 16px;
+    gap: 16px;
   }
 
   .scene-copy,
   .panel-section {
-    padding: 18px;
+    padding: 16px;
   }
 
   .face-grid,

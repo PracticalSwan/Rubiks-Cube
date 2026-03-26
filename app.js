@@ -30,7 +30,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 container.appendChild(renderer.domElement);
 
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-camera.position.set(6.5, 5.6, 7.2);
+camera.position.set(7.6, 6.3, 8.5);
 
 // OrbitControls remain active for drag rotation, but zoom is button-driven only.
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -38,9 +38,9 @@ controls.target.set(0, 0, 0);
 controls.enableDamping = true;
 controls.enablePan = false;
 controls.enableZoom = false;
-controls.minDistance = 4.5;
-controls.maxDistance = 14;
-controls.maxPolarAngle = Math.PI * 0.48;
+controls.minDistance = 5.4;
+controls.maxDistance = 16;
+controls.maxPolarAngle = Math.PI;
 controls.update();
 
 // Flat materials remove lighting-based tint shifts and make sticker colors match the UI labels.
@@ -302,7 +302,7 @@ async function handleRandomize() {
     renderControls();
 
     await rubiksCube.queueMoves(scramble);
-    setHistoryMoves(scramble);
+    appendHistoryMoves(scramble);
     clearSolveArtifacts();
     finalizeIdleStatus('Random-state scramble complete. Choose a color to solve.');
   } catch (error) {
@@ -343,6 +343,7 @@ async function handleSolve() {
   try {
     const solverMoves = await solverEngine.solve(preSolveFacelets);
     const plan = chooseSolvePlan({
+      currentFacelets: preSolveFacelets,
       historyMoves: preSolveHistory,
       solverMoves,
     });

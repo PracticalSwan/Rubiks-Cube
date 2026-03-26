@@ -1,5 +1,12 @@
 # Lessons
 
+## 2026-03-26 - Orbit freedom, viewport fit, and repeated scrambles
+
+- If `OrbitControls` feels like vertical drag is "blocked," check `maxPolarAngle` before touching gesture handlers; a low polar cap can mimic a broken drag system even when pointer events are fine.
+- Reversible move history is only safe as a solve shortcut when it still reconstructs the current cube state from solved; once history can drift, validate it against live facelets before preferring it over the real solver.
+- Random-state scrambles should extend the recorded move history instead of replacing it, otherwise a second scramble turns reverse-history playback into a rewind to an earlier scrambled state rather than a full solve.
+- On a two-column WebGL layout, fixing desktop overflow is usually a combination of constraining the shell height, letting the control rail scroll internally, and slightly backing the camera off so the scene breathes without breaking the stacked mobile layout.
+
 ## 2026-03-26 - Vite migration and vendored solver packaging
 
 - A raw vendored CommonJS folder can pass tests and builds yet still fail in Vite dev with `module is not defined`; wrapping it as a local file dependency gives Vite a package boundary it can prebundle reliably.

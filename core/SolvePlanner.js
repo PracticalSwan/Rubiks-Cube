@@ -1,8 +1,10 @@
 // Chooses the most useful solve playback path between solver output and reversible move history.
 import {
+  applyAlgorithmToFacelets,
   formatAlgorithm,
   invertAlgorithm,
   parseAlgorithm,
+  SOLVED_FACELETS,
   simplifyAlgorithm,
 } from './CubeNotation.js';
 
@@ -15,16 +17,19 @@ function createCandidate(strategy, label, moves) {
   };
 }
 
-export function chooseSolvePlan({ historyMoves = [], solverMoves = [] }) {
+export function chooseSolvePlan({ currentFacelets = null, historyMoves = [], solverMoves = [] }) {
   const candidates = [];
+  const normalizedHistory = simplifyAlgorithm(historyMoves);
+  const normalizedSolver = parseAlgorithm(solverMoves);
 
   // We normalize both paths before comparing so the UI never prefers a longer
   // sequence just because it contains redundant quarter turns.
-  const normalizedHistory = simplifyAlgorithm(historyMoves);
   const reverseHistory = invertAlgorithm(normalizedHistory);
-  const normalizedSolver = parseAlgorithm(solverMoves);
+  const historyMatchesCurrentState =
+    !currentFacelets ||
+    applyAlgorithmToFacelets(SOLVED_FACELETS, normalizedHistory) === currentFacelets;
 
-  if (reverseHistory.length) {
+  if (reverseHistory.length && historyMatchesCurrentState) {
     candidates.push(createCandidate('history', 'History-aware reverse', reverseHistory));
   }
 

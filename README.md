@@ -5,11 +5,12 @@ Mini Hands On Cube is a standalone Three.js Rubik's Cube app with color-based fa
 ## Features
 
 - Interactive 3x3x3 Rubik's Cube scene.
+- Free orbit drag around the cube, including full vertical pitch, while zoom stays on explicit `-` and `+` buttons.
 - Color-based face selector and directional controls for manual turns.
 - Utility controls for `Reset`, `Randomize`, `Solve`, `Show moves`, `Revert solve`, `Stop`, and button-only zoom.
 - Solver integration powered by `cubejs`.
-- History-aware solve planning that prefers reversing the recorded scramble or manual turns when that route is shorter than the default solver output.
-- Responsive layout that keeps the scene and controls usable on desktop, tablet, and mobile widths.
+- State-aware solve planning that only reuses recorded history when it still matches the live cube state, and otherwise falls back to the `cubejs` solver so repeated random scrambles still solve cleanly.
+- Responsive layout that keeps the desktop shell inside the viewport while still stacking cleanly on tablet and mobile widths.
 - Accessible status updates and visible keyboard focus styling for control flows.
 
 ## Quick Start
@@ -73,12 +74,12 @@ npm run format
 3. Use the direction pad to rotate that layer.
 4. Use utility controls when needed.
 5. `Randomize` creates a true random-state scramble and animates it.
-6. `Solve` computes a recovery sequence, preferring the shorter of the solver output or the inverse of your recorded move history.
+6. `Solve` computes a recovery sequence, preferring the shorter of the solver output or the inverse of your recorded move history only when that history still matches the live cube state.
 7. `Show moves` reveals the exact sequence used by the last solve.
 8. `Revert solve` restores the cube to the state it had right before the last solve playback.
 9. `Stop` cancels active playback safely without leaving the app in a stuck state.
 10. `Reset` returns to solved state instantly.
-11. `-` and `+` are the only zoom controls; wheel and touch stay dedicated to orbiting the cube.
+11. Drag the scene to orbit freely around the cube, and use `-` / `+` when you want to change camera distance.
 
 Status text reports current app state: `warming`, `idle`, `scrambling`, `solving`, `solved`, or `error`.
 
