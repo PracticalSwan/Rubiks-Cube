@@ -81,3 +81,13 @@ npm run format
 11. `-` and `+` are the only zoom controls; wheel and touch stay dedicated to orbiting the cube.
 
 Status text reports current app state: `warming`, `idle`, `scrambling`, `solving`, `solved`, or `error`.
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for local setup, verification, and pull request expectations. Please also review the [Code of Conduct](./CODE_OF_CONDUCT.md) and [Security Policy](./SECURITY.md) before contributing.
+
+## License
+
+Mini Hands On Cube is released under the [MIT License](./LICENSE).
+
+Copyright (c) 2026 Sithu Win San.

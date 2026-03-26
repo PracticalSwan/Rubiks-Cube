@@ -8,6 +8,8 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 
 ### Added
 
+- MIT `LICENSE` for Sithu Win San.
+- Baseline repo-health files: `.editorconfig`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and `SECURITY.md`.
 - Local `docs/` workflow scaffold with protected `plans`, `specs`, `handoffs`, and reusable templates.
 - `scripts/session-start.mjs` to scaffold dated plan, spec, and handoff artifacts for new sessions.
 - `scripts/check-workflow-changes.mjs` and `scripts/verify-workflow.mjs` for commit-time and verification-time workflow checks.
@@ -24,6 +26,8 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 
 ### Changed
 
+- Expanded `README.md` with contribution, conduct, security, and license references while keeping runtime setup and usage as the primary focus.
+- Added `author`, `repository`, `bugs`, and `homepage` metadata to `package.json`.
 - Cleaned contributor docs so the current Vite and Vitest workflow is the only documented path, including removal of stale Python fallback references from local instructions.
 - Reintroduced lightweight contributor automation in `package.json` with `prepare`, `session:start`, and `verify` scripts while keeping the runtime start commands intact.
 - Expanded local `CLAUDE.md` so new sessions have an explicit bootstrap path and protected-doc boundaries inside the standalone project.

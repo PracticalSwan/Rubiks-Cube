@@ -4,6 +4,15 @@
   "private": true,
   "type": "module",
   "description": "Standalone Three.js Rubik's Cube app with manual turns and solver-assisted recovery.",
+  "author": "Sithu Win San",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PracticalSwan/Rubiks-Cube.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PracticalSwan/Rubiks-Cube/issues"
+  },
+  "homepage": "https://github.com/PracticalSwan/Rubiks-Cube#readme",
   "scripts": {
     "prepare": "husky",
     "dev": "vite --host 0.0.0.0",
