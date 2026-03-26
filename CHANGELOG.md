@@ -4,6 +4,33 @@ All notable changes to this standalone cube project should be documented in this
 
 The format is based on Keep a Changelog and the project follows a simple date-based workshop history rather than strict releases.
 
+## [2026-03-26]
+
+### Added
+
+- Husky-based git hook workflow via `prepare` script and `.husky` hook files.
+- `scripts/check-readme-against-gitignore.mjs` to block README content that references ignored paths.
+- `scripts/check-session-workflow.mjs` to enforce staged updates for `CHANGELOG.md`, `LESSONS.md`, and `README.md` during major functional changes.
+- `check:readme` and `verify` scripts for local and hook-driven validation.
+- Local reminder hooks for session start and post-commit discipline.
+
+### Changed
+
+- Updated `pre-commit` to remind session startup reading of `LESSONS.md` and enforce README scope checks.
+- Updated `pre-commit` to enforce Serena/LESSONS/CHANGELOG/README workflow policy checks.
+- Updated `pre-push` to remind end-of-task documentation and run the full verify pipeline before allowing pushes.
+- Expanded local `.gitignore` with agent/tooling artifacts and common local cache/environment files.
+- Rewrote local `README.md` to remain strictly project-focused (no AI or workflow sections).
+- Fixed `Stop`/playback cancellation handling so expected cancel flows update status without logging console errors.
+- Fixed stacked-layout scene sizing so tablet and mobile viewports keep the cube framed instead of letting the WebGL canvas balloon the panel height.
+- Refined the local testing plan with the standalone app URL, practical Playwright selector guidance, and the current Three.js DevTools bridge workflow.
+
+### Removed
+
+- Local Jest test harness, test files, and Jest config so the folder now ships as a lean runtime-only app.
+- Agent/workflow hook files and helper scripts that were only needed for AI-assisted session discipline.
+- Planning and spec documents that were useful during implementation but are not required to run or use the project.
+
 ## [2026-03-25]
 
 ### Added

@@ -1,6 +1,7 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.129.0/build/three.module.js';
 import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
 import { FACE_COLORS } from './core/CubeNotation.js';
+import { getActionErrorState } from './core/appErrorState.js';
 import { RubiksCube } from './core/RubiksCube.js';
 import { SolverEngine } from './core/SolverEngine.js';
 import { createRubiksCubeApp } from './core/createRubiksCubeApp.js';
@@ -185,14 +186,15 @@ async function runQueuedAction(action, labels) {
     finalizeIdleStatus(labels.idleStatus);
   } catch (error) {
     state.isBusy = false;
+    const nextState = getActionErrorState(error, {
+      fallbackMessage: 'Action failed'
+    });
 
-    if (error?.code === 'PLAYBACK_CANCELLED') {
-      state.status = 'Playback stopped';
-    } else {
+    if (nextState.shouldLog) {
       console.error(error);
-      state.status = error?.message ?? 'Action failed';
     }
 
+    state.status = nextState.status;
     renderControls();
   }
 }
@@ -226,18 +228,15 @@ async function handleSolve() {
     finalizeIdleStatus('Solve playback complete');
   } catch (error) {
     state.isBusy = false;
-    console.error(error);
+    const nextState = getActionErrorState(error, {
+      fallbackMessage: 'Solve failed'
+    });
 
-    if (error?.code === 'INVALID_FACELETS') {
-      state.status = 'The current cube state could not be serialized.';
-    } else if (error?.code === 'IMPOSSIBLE_STATE') {
-      state.status = 'The current cube state is impossible to solve.';
-    } else if (error?.code === 'PLAYBACK_CANCELLED') {
-      state.status = 'Playback stopped';
-    } else {
-      state.status = error?.message ?? 'Solve failed';
+    if (nextState.shouldLog) {
+      console.error(error);
     }
 
+    state.status = nextState.status;
     renderControls();
   }
 }
