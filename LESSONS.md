@@ -1,5 +1,11 @@
 # Lessons
 
+## 2026-03-26 - Lightweight agentic workflow bootstrap
+
+- Keep session automation inside the standalone cube folder so the workflow survives repo extraction without depending on root-only tooling.
+- Use hook automation for reminders and durable doc guards, not for user-facing runtime behavior.
+- Prefer lightweight Node scripts plus `node:test` for contributor workflow checks when the runtime app does not need a full test harness.
+
 ## 2026-03-26 - README scope and workflow discipline
 
 - Keep `README.md` strictly for shipped project behavior and runtime usage when AI-related folders or workflow artifacts are intentionally excluded from pushes.

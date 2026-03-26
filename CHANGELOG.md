@@ -8,6 +8,11 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 
 ### Added
 
+- Local `docs/` workflow scaffold with protected `plans`, `specs`, `handoffs`, and reusable templates.
+- `scripts/session-start.mjs` to scaffold dated plan, spec, and handoff artifacts for new sessions.
+- `scripts/check-workflow-changes.mjs` and `scripts/verify-workflow.mjs` for commit-time and verification-time workflow checks.
+- Lightweight `node:test` coverage for the shared workflow helper module.
+- Husky `post-checkout`, `post-merge`, `pre-commit`, and `pre-push` hooks for session reminders and verification.
 - Husky-based git hook workflow via `prepare` script and `.husky` hook files.
 - `scripts/check-readme-against-gitignore.mjs` to block README content that references ignored paths.
 - `scripts/check-session-workflow.mjs` to enforce staged updates for `CHANGELOG.md`, `LESSONS.md`, and `README.md` during major functional changes.
@@ -16,6 +21,9 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 
 ### Changed
 
+- Reintroduced lightweight contributor automation in `package.json` with `prepare`, `session:start`, `test`, and `verify` scripts while keeping the runtime start commands intact.
+- Expanded local `CLAUDE.md` so new sessions have an explicit bootstrap path and protected-doc boundaries inside the standalone project.
+- Ignored Husky's generated support folder so the repo only needs the authored hook files.
 - Updated `pre-commit` to remind session startup reading of `LESSONS.md` and enforce README scope checks.
 - Updated `pre-commit` to enforce Serena/LESSONS/CHANGELOG/README workflow policy checks.
 - Updated `pre-push` to remind end-of-task documentation and run the full verify pipeline before allowing pushes.

@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Mini Hands On Cube session reminder:"
+echo "- Read CLAUDE.md and LESSONS.md"
+echo "- Read the relevant Serena memories"
+echo "- Run npm run session:start -- \"<topic>\""

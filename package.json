@@ -5,10 +5,16 @@
   "type": "module",
   "description": "Standalone Three.js Rubik's Cube app with manual turns and solver-assisted recovery.",
   "scripts": {
+    "prepare": "husky",
     "start": "http-server -p 8000 -c-1",
     "start:no-overlay": "cross-env THREEJS_DEVTOOLS_NO_OVERLAY=true http-server -p 8000 -c-1",
     "start:python": "python -m http.server 8000",
-    "start:python2": "python -m SimpleHTTPServer 8000"
+    "start:python2": "python -m SimpleHTTPServer 8000",
+    "session:start": "node ./scripts/session-start.mjs",
+    "workflow:guard": "node ./scripts/check-workflow-changes.mjs",
+    "workflow:verify": "node ./scripts/verify-workflow.mjs",
+    "test": "node --test tests/workflow/*.test.mjs",
+    "verify": "npm run test && npm run workflow:verify"
   },
   "keywords": [
     "threejs",
@@ -19,7 +25,8 @@
   "license": "MIT",
   "devDependencies": {
     "cross-env": "^10.1.0",
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "husky": "^9.1.7"
   },
   "dependencies": {
     "cubejs": "^1.3.2"
