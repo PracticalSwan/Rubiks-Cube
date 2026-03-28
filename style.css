@@ -375,6 +375,11 @@ button:focus-visible {
   text-align: left;
 }
 
+.face-text {
+  display: grid;
+  gap: 2px;
+}
+
 .face-swatch {
   width: 14px;
   height: 14px;
@@ -386,6 +391,12 @@ button:focus-visible {
 
 .face-label {
   font-weight: 600;
+}
+
+.face-copy {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
 .face-button[data-selected='true'] {
@@ -506,6 +517,57 @@ button:focus-visible {
   color: var(--text-main);
   line-height: 1.7;
   word-break: break-word;
+}
+
+.move-plan-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.move-plan-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.move-plan-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 999px;
+  background: rgba(138, 196, 255, 0.16);
+  color: #dceeff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.move-plan-step-body {
+  display: grid;
+  gap: 6px;
+}
+
+.move-plan-step-copy {
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+.move-plan-step-notation {
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.78rem;
 }
 
 .status-block {

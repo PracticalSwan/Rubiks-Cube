@@ -1,5 +1,11 @@
 # Lessons
 
+## 2026-03-28 - Live center-color selection and readable move copy
+
+- If the UI teaches face identity through colors, store the player's selection as the color identity and resolve notation faces from live center stickers on demand; middle-slice moves otherwise make the selector lie.
+- A locked face-selection model should follow the selected center after slice moves, not just rename the selector button; otherwise the highlighted color and the visible front face drift apart.
+- Solve move lists become much easier to trust when descriptions are generated step-by-step from the live facelet state before each move, because slice turns can change which color owns `U`, `R`, or `F` later in the same sequence.
+
 ## 2026-03-28 - Canonical face locking and cube-centered overlays
 
 - If a face-lock feature starts from an auto-spinning presentation state, snapping only the camera is not enough; reset the cube's presentation rotation to a canonical pose first or the chosen color will drift away from the intended front view.

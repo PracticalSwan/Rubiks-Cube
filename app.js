@@ -3,8 +3,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {
   FACE_COLORS,
-  FACE_LABELS,
-  formatAlgorithm,
+  describeAlgorithmMoves,
+  getColorFaceOptions,
+  getLiveColorFaceMap,
   simplifyAlgorithm,
 } from './core/CubeNotation.js';
 import { getFaceLockRotation, getLayerArrowControls } from './core/LayerArrowMode.js';
@@ -91,7 +92,7 @@ const solverEngine = new SolverEngine({});
 const state = {
   currentMode: 'classic',
   faceViewLocked: false,
-  selectedFace: null,
+  selectedColor: null,
   idleSpinEnabled: true,
   isBusy: false,
   isOrbiting: false,
@@ -130,7 +131,7 @@ const app = createRubiksCubeApp({
 });
 
 function syncIdleSpinState() {
-  state.idleSpinEnabled = !state.isBusy && !state.isOrbiting && !state.selectedFace;
+  state.idleSpinEnabled = !state.isBusy && !state.isOrbiting && !state.selectedColor;
 }
 
 function setHistoryMoves(nextMoves) {
@@ -147,19 +148,49 @@ function clearSolveArtifacts() {
   state.moveListOpen = false;
 }
 
+function getCurrentFacelets() {
+  return rubiksCube.toFaceletString();
+}
+
+function getSelectedFaceContext(facelets = getCurrentFacelets()) {
+  if (!state.selectedColor) {
+    return null;
+  }
+
+  const liveColorFaceMap = getLiveColorFaceMap(facelets);
+  const currentFace = liveColorFaceMap[state.selectedColor];
+
+  if (!currentFace) {
+    return null;
+  }
+
+  const selectorOption = getColorFaceOptions(facelets).find(
+    (option) => option.colorFace === state.selectedColor
+  );
+
+  return {
+    colorFace: state.selectedColor,
+    colorLabel: selectorOption?.label ?? state.selectedColor,
+    currentFace,
+    currentPositionLabel: selectorOption?.currentPositionLabel ?? currentFace,
+  };
+}
+
 function getIdleStatusMessage(fallbackMessage) {
   if (fallbackMessage) {
     return fallbackMessage;
   }
 
-  if (state.selectedFace) {
+  const selectedFaceContext = getSelectedFaceContext();
+
+  if (selectedFaceContext) {
     if (state.currentMode === 'arrow') {
       return state.faceViewLocked
-        ? `Layer arrows are locked to ${FACE_LABELS[state.selectedFace]}. Drag once to unlock the view.`
-        : `Layer arrows are ready on ${FACE_LABELS[state.selectedFace]}. Choose another color to re-lock the view.`;
+        ? `Layer arrows are locked to ${selectedFaceContext.colorLabel} on the ${selectedFaceContext.currentPositionLabel.toLowerCase()} face. Drag once to unlock the view.`
+        : `Layer arrows are ready for ${selectedFaceContext.colorLabel}. Choose another color to re-lock the view.`;
     }
 
-    return `Ready to turn ${FACE_LABELS[state.selectedFace]}.`;
+    return `Ready to turn ${selectedFaceContext.colorLabel} on the ${selectedFaceContext.currentPositionLabel.toLowerCase()} face.`;
   }
 
   return state.currentMode === 'arrow'
@@ -223,7 +254,7 @@ function getProjectedCubeBounds() {
 }
 
 function syncLayerArrowOverlayLayout() {
-  if (state.currentMode !== 'arrow' || !state.selectedFace || layerArrowOverlay.hidden) {
+  if (state.currentMode !== 'arrow' || !state.selectedColor || layerArrowOverlay.hidden) {
     return;
   }
 
@@ -252,12 +283,14 @@ function clearFaceLock() {
 }
 
 function handleFaceSelection(face) {
-  const nextFace = state.selectedFace === face ? null : face;
+  const nextColor = state.selectedColor === face ? null : face;
 
-  state.selectedFace = nextFace;
+  state.selectedColor = nextColor;
 
-  if (state.currentMode === 'arrow' && nextFace) {
-    setFaceLock(nextFace);
+  const selectedFaceContext = getSelectedFaceContext();
+
+  if (state.currentMode === 'arrow' && selectedFaceContext) {
+    setFaceLock(selectedFaceContext.currentFace);
   } else {
     clearFaceLock();
   }
@@ -274,8 +307,10 @@ function handleModeChange(mode) {
 
   state.currentMode = mode;
 
-  if (mode === 'arrow' && state.selectedFace) {
-    setFaceLock(state.selectedFace);
+  const selectedFaceContext = getSelectedFaceContext();
+
+  if (mode === 'arrow' && selectedFaceContext) {
+    setFaceLock(selectedFaceContext.currentFace);
   } else {
     clearFaceLock();
   }
@@ -293,6 +328,16 @@ function queuePlayerMoves(moves, labels) {
     ...labels,
     onSuccess: (completedMoves) => {
       appendHistoryMoves(completedMoves);
+      const currentFacelets = getCurrentFacelets();
+
+      if (state.currentMode === 'arrow' && state.faceViewLocked) {
+        const selectedFaceContext = getSelectedFaceContext(currentFacelets);
+
+        if (selectedFaceContext) {
+          setFaceLock(selectedFaceContext.currentFace, { immediate: true });
+        }
+      }
+
       clearSolveArtifacts();
       labels.onSuccess?.(completedMoves);
     },
@@ -311,13 +356,17 @@ function resizeRenderer() {
 
 // The controls are rendered from state each time so button enablement always matches camera/cube state.
 function renderControls() {
+  const currentFacelets = getCurrentFacelets();
+  const selectedFaceContext = getSelectedFaceContext(currentFacelets);
+
   renderInteractionModeToggle(interactionMode, {
     currentMode: state.currentMode,
     onChange: handleModeChange,
   });
 
   renderFaceSelector(faceSelector, {
-    selectedFace: state.selectedFace,
+    options: getColorFaceOptions(currentFacelets),
+    selectedColor: state.selectedColor,
     isBusy: state.isBusy,
     onSelect: handleFaceSelection,
   });
@@ -326,13 +375,17 @@ function renderControls() {
 
   if (state.currentMode === 'classic') {
     renderDirectionalPad(directionalPad, {
-      selectedFace: state.selectedFace,
+      selectedFace: selectedFaceContext?.currentFace ?? null,
+      selectedLabel: selectedFaceContext?.colorLabel ?? '',
+      selectedPositionLabel: selectedFaceContext?.currentPositionLabel ?? '',
       isBusy: state.isBusy,
       onTurn: (face, direction) => {
         const move = direction === 'clockwise' ? face : `${face}'`;
         queuePlayerMoves([move], {
-          busyStatus: `Turning ${move}`,
-          idleStatus: `Turned ${move}`,
+          busyStatus: `Turning ${selectedFaceContext?.colorLabel ?? 'selected'} ${
+            direction === 'clockwise' ? 'clockwise' : 'counterclockwise'
+          }`,
+          idleStatus: `${selectedFaceContext?.colorLabel ?? 'Selected'} turn complete.`,
         });
       },
     });
@@ -342,13 +395,13 @@ function renderControls() {
 
   renderLayerArrowOverlay(layerArrowOverlay, {
     controls:
-      state.currentMode === 'arrow' && state.selectedFace
-        ? getLayerArrowControls(state.selectedFace)
+      state.currentMode === 'arrow' && selectedFaceContext
+        ? getLayerArrowControls(selectedFaceContext.currentFace)
         : [],
     currentMode: state.currentMode,
     cubeBounds:
-      state.currentMode === 'arrow' && state.selectedFace ? getProjectedCubeBounds() : null,
-    faceLabel: state.selectedFace ? FACE_LABELS[state.selectedFace] : '',
+      state.currentMode === 'arrow' && selectedFaceContext ? getProjectedCubeBounds() : null,
+    faceLabel: selectedFaceContext?.colorLabel ?? '',
     isBusy: state.isBusy,
     isLocked: state.faceViewLocked,
     onArrow: (control) => {
@@ -547,7 +600,7 @@ async function handleSolve() {
     };
     state.lastSolvePlan = {
       ...plan,
-      moveText: formatAlgorithm(plan.moves),
+      moveDetails: describeAlgorithmMoves(plan.moves, preSolveFacelets),
     };
     state.moveListOpen = false;
     state.status = `Solving with ${plan.label} (${plan.moves.length} moves)`;

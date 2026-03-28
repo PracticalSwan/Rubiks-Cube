@@ -19,6 +19,9 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 - Classic mode now hides the arrow overlay, while Layer Arrow Mode hides the clockwise/counterclockwise pad so the active interaction affordance is always clear.
 - Camera handling now supports short face-focus transitions and manual drag-based unlocks without breaking zoom buttons, random scrambles, solve playback, or recorded move history.
 - The Layer Arrow overlay now positions itself from the cube's projected screen bounds, which keeps the arrow ring centered and responsive on narrower viewports.
+- The face selector now follows live center stickers instead of fixed notation faces, so choosing `Blue` always targets the face whose center is blue right now.
+- Layer Arrow Mode now re-locks the selected center color after slice turns, which keeps the chosen color forward even when middle-layer moves shift centers to new faces.
+- Solve playback details now render as readable numbered instructions with notation badges, so non-cubers can follow move sets without knowing `R`, `L`, or `M` ahead of time.
 
 ## [2026-03-26]
 

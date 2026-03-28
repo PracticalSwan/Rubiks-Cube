@@ -71,7 +71,25 @@ export function renderUtilityControls(container, props) {
             </div>
             ${
               moveListOpen
-                ? `<p class="move-plan-copy" data-role="move-copy">${escapeHtml(lastSolvePlan.moveText)}</p>`
+                ? lastSolvePlan.moveDetails?.length
+                  ? `
+                    <ol class="move-plan-list" data-role="move-copy">
+                      ${lastSolvePlan.moveDetails
+                        .map(
+                          (step, index) => `
+                            <li class="move-plan-step">
+                              <span class="move-plan-step-number">${index + 1}</span>
+                              <div class="move-plan-step-body">
+                                <span class="move-plan-step-copy">${escapeHtml(step.description)}</span>
+                                <code class="move-plan-step-notation">${escapeHtml(step.notation)}</code>
+                              </div>
+                            </li>
+                          `
+                        )
+                        .join('')}
+                    </ol>
+                  `
+                  : `<p class="move-plan-copy" data-role="move-copy">${escapeHtml(lastSolvePlan.moveText)}</p>`
                 : ''
             }
           </div>

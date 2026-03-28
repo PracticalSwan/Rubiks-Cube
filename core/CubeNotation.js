@@ -19,9 +19,26 @@ export const FACE_COLORS = Object.fromEntries(
   FACE_ORDER.map((face) => [face, FACE_DETAILS[face].color])
 );
 
+export const POSITION_LABELS = {
+  U: 'Top',
+  R: 'Right',
+  F: 'Front',
+  D: 'Bottom',
+  L: 'Left',
+  B: 'Back',
+};
+
 export const MOVE_FACES = ['U', 'D', 'R', 'L', 'F', 'B'];
 
 export const SOLVED_FACELETS = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB';
+const FACE_CENTER_INDICES = {
+  U: 4,
+  R: 13,
+  F: 22,
+  D: 31,
+  L: 40,
+  B: 49,
+};
 
 // Normal vectors let us rotate stickers in 3D while still projecting back to face notation.
 const FACE_NORMALS = {
@@ -282,6 +299,101 @@ export function invertAlgorithm(algorithm) {
 export function formatAlgorithm(algorithm, fallback = 'No moves recorded yet.') {
   const moves = parseAlgorithm(algorithm);
   return moves.length ? moves.join(' ') : fallback;
+}
+
+function getSafeFacelets(facelets) {
+  return typeof facelets === 'string' && facelets.length === 54 ? facelets : SOLVED_FACELETS;
+}
+
+export function getFaceCenterStickers(facelets = SOLVED_FACELETS) {
+  const safeFacelets = getSafeFacelets(facelets);
+
+  return Object.fromEntries(
+    FACE_ORDER.map((face) => [face, safeFacelets[FACE_CENTER_INDICES[face]]])
+  );
+}
+
+export function getLiveColorFaceMap(facelets = SOLVED_FACELETS) {
+  const centers = getFaceCenterStickers(facelets);
+
+  return Object.fromEntries(
+    FACE_ORDER.map((colorFace) => [
+      colorFace,
+      FACE_ORDER.find((face) => centers[face] === colorFace) ?? colorFace,
+    ])
+  );
+}
+
+export function getColorFaceOptions(facelets = SOLVED_FACELETS) {
+  const liveColorFaceMap = getLiveColorFaceMap(facelets);
+
+  return FACE_ORDER.map((colorFace) => {
+    const currentFace = liveColorFaceMap[colorFace];
+
+    return {
+      ...FACE_DETAILS[colorFace],
+      colorFace,
+      currentFace,
+      currentPositionLabel: POSITION_LABELS[currentFace],
+      label: FACE_LABELS[colorFace],
+    };
+  });
+}
+
+function describeOuterMove(move, facelets) {
+  const colorFace = getFaceCenterStickers(facelets)[move[0]] ?? move[0];
+  const colorLabel = `${FACE_LABELS[colorFace] ?? colorFace}`.toLowerCase();
+
+  if (move.endsWith('2')) {
+    return `Turn the ${colorLabel}-center face 180 degrees`;
+  }
+
+  return `Turn the ${colorLabel}-center face ${
+    move.endsWith("'") ? 'counterclockwise' : 'clockwise'
+  }`;
+}
+
+function describeSliceMove(move) {
+  switch (move) {
+    case 'M':
+      return 'Move the middle vertical slice downward';
+    case "M'":
+      return 'Move the middle vertical slice upward';
+    case 'M2':
+      return 'Move the middle vertical slice 180 degrees';
+    case 'E':
+      return 'Move the middle horizontal slice to the right';
+    case "E'":
+      return 'Move the middle horizontal slice to the left';
+    case 'E2':
+      return 'Move the middle horizontal slice 180 degrees';
+    case 'S':
+      return 'Rotate the middle depth slice clockwise';
+    case "S'":
+      return 'Rotate the middle depth slice counterclockwise';
+    case 'S2':
+      return 'Rotate the middle depth slice 180 degrees';
+    default:
+      return move;
+  }
+}
+
+export function describeAlgorithmMoves(algorithm, startingFacelets = SOLVED_FACELETS) {
+  const moves = parseAlgorithm(algorithm);
+  let facelets = getSafeFacelets(startingFacelets);
+
+  return moves.map((move) => {
+    const description = MOVE_FACES.includes(move[0])
+      ? describeOuterMove(move, facelets)
+      : describeSliceMove(move);
+
+    facelets = applyMoveToFacelets(facelets, move);
+
+    return {
+      notation: move,
+      description,
+    };
+  });
 }
 
 // Facelet application helpers are the shared bridge between solver output and rendered cube state.

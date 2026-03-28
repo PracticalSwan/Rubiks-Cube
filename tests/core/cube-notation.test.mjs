@@ -3,7 +3,10 @@ import { expect, test } from 'vitest';
 import {
   applyAlgorithmToFacelets,
   applyMoveToFacelets,
+  describeAlgorithmMoves,
   FACE_LABELS,
+  getColorFaceOptions,
+  getLiveColorFaceMap,
   invertAlgorithm,
   simplifyAlgorithm,
   SOLVED_FACELETS,
@@ -38,4 +41,47 @@ test('notation helpers accept middle-slice moves for history-aware playback', ()
 
   expect(applyMoveToFacelets(SOLVED_FACELETS, 'M')).not.toBe(SOLVED_FACELETS);
   expect(applyAlgorithmToFacelets(SOLVED_FACELETS, ['M', "M'"])).toBe(SOLVED_FACELETS);
+});
+
+test('getLiveColorFaceMap follows center stickers after a middle-slice move', () => {
+  const shiftedFacelets = applyMoveToFacelets(SOLVED_FACELETS, 'M');
+
+  expect(getLiveColorFaceMap(shiftedFacelets)).toEqual({
+    U: 'F',
+    R: 'R',
+    F: 'D',
+    D: 'B',
+    L: 'L',
+    B: 'U',
+  });
+
+  const blueOption = getColorFaceOptions(shiftedFacelets).find(
+    (option) => option.colorFace === 'B'
+  );
+
+  expect(blueOption).toMatchObject({
+    colorFace: 'B',
+    currentFace: 'U',
+    currentPositionLabel: 'Top',
+    label: 'Blue',
+  });
+});
+
+test('describeAlgorithmMoves explains turns with live center colors and readable slice directions', () => {
+  const shiftedFacelets = applyMoveToFacelets(SOLVED_FACELETS, 'M');
+
+  expect(describeAlgorithmMoves(['R', "U'", "M'"], shiftedFacelets)).toEqual([
+    {
+      notation: 'R',
+      description: 'Turn the red-center face clockwise',
+    },
+    {
+      notation: "U'",
+      description: 'Turn the blue-center face counterclockwise',
+    },
+    {
+      notation: "M'",
+      description: 'Move the middle vertical slice upward',
+    },
+  ]);
 });
