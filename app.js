@@ -7,6 +7,7 @@ import {
   formatAlgorithm,
   simplifyAlgorithm,
 } from './core/CubeNotation.js';
+import { getFaceLockRotation, getLayerArrowControls } from './core/LayerArrowMode.js';
 import { getActionErrorState } from './core/appErrorState.js';
 import { RubiksCube } from './core/RubiksCube.js';
 import { loadCubeClass } from './core/loadCubeClass.js';
@@ -15,12 +16,16 @@ import { chooseSolvePlan } from './core/SolvePlanner.js';
 import { createRubiksCubeApp } from './core/createRubiksCubeApp.js';
 import { renderDirectionalPad } from './ui/DirectionalPad.js';
 import { renderFaceSelector } from './ui/FaceSelector.js';
+import { renderInteractionModeToggle } from './ui/InteractionModeToggle.js';
+import { renderLayerArrowOverlay, updateLayerArrowOverlayLayout } from './ui/LayerArrowOverlay.js';
 import { renderUtilityControls } from './ui/UtilityControls.js';
 
 globalThis.THREE = THREE;
 
 const container = document.getElementById('container3D');
 const faceSelector = document.getElementById('face-selector');
+const interactionMode = document.getElementById('interaction-mode');
+const layerArrowOverlay = document.getElementById('layer-arrow-overlay');
 const directionalPad = document.getElementById('directional-pad');
 const utilityControls = document.getElementById('utility-controls');
 // Scene and camera stay intentionally simple so the sticker colors are always read accurately.
@@ -84,6 +89,8 @@ const solverEngine = new SolverEngine({});
 
 // Shared app state keeps scene motion, solve history, and UI affordances in sync.
 const state = {
+  currentMode: 'classic',
+  faceViewLocked: false,
   selectedFace: null,
   idleSpinEnabled: true,
   isBusy: false,
@@ -95,6 +102,23 @@ const state = {
   lastSolveSnapshot: null,
   moveListOpen: false,
 };
+
+const LOCKED_FRONT_VIEW = {
+  eyeDirection: [0, 0, 1],
+  upDirection: [0, 1, 0],
+};
+const projectedCubeBounds = new THREE.Box3();
+const projectedCorner = new THREE.Vector3();
+const projectedCubeCorners = [
+  new THREE.Vector3(),
+  new THREE.Vector3(),
+  new THREE.Vector3(),
+  new THREE.Vector3(),
+  new THREE.Vector3(),
+  new THREE.Vector3(),
+  new THREE.Vector3(),
+  new THREE.Vector3(),
+];
 
 const app = createRubiksCubeApp({
   rubiksCube,
@@ -129,10 +153,150 @@ function getIdleStatusMessage(fallbackMessage) {
   }
 
   if (state.selectedFace) {
+    if (state.currentMode === 'arrow') {
+      return state.faceViewLocked
+        ? `Layer arrows are locked to ${FACE_LABELS[state.selectedFace]}. Drag once to unlock the view.`
+        : `Layer arrows are ready on ${FACE_LABELS[state.selectedFace]}. Choose another color to re-lock the view.`;
+    }
+
     return `Ready to turn ${FACE_LABELS[state.selectedFace]}.`;
   }
 
-  return 'Choose a color to pause the demo spin.';
+  return state.currentMode === 'arrow'
+    ? 'Choose a color to bring a face forward and enable layer arrows.'
+    : 'Choose a color to pause the demo spin.';
+}
+
+function getProjectedCubeBounds() {
+  projectedCubeBounds.setFromObject(rubiksCube.group);
+
+  if (projectedCubeBounds.isEmpty()) {
+    return null;
+  }
+
+  const width = renderer.domElement.clientWidth || container.clientWidth;
+  const height = renderer.domElement.clientHeight || container.clientHeight;
+
+  if (!width || !height) {
+    return null;
+  }
+
+  const { min, max } = projectedCubeBounds;
+  const cornerValues = [
+    [min.x, min.y, min.z],
+    [min.x, min.y, max.z],
+    [min.x, max.y, min.z],
+    [min.x, max.y, max.z],
+    [max.x, min.y, min.z],
+    [max.x, min.y, max.z],
+    [max.x, max.y, min.z],
+    [max.x, max.y, max.z],
+  ];
+  let minX = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+
+  cornerValues.forEach(([x, y, z], index) => {
+    projectedCubeCorners[index].set(x, y, z);
+    projectedCorner.copy(projectedCubeCorners[index]).project(camera);
+
+    const projectedX = (projectedCorner.x * 0.5 + 0.5) * width;
+    const projectedY = (-projectedCorner.y * 0.5 + 0.5) * height;
+
+    minX = Math.min(minX, projectedX);
+    maxX = Math.max(maxX, projectedX);
+    minY = Math.min(minY, projectedY);
+    maxY = Math.max(maxY, projectedY);
+  });
+
+  return {
+    centerX: (minX + maxX) / 2,
+    centerY: (minY + maxY) / 2,
+    height: maxY - minY,
+    left: minX,
+    right: maxX,
+    top: minY,
+    bottom: maxY,
+    width: maxX - minX,
+  };
+}
+
+function syncLayerArrowOverlayLayout() {
+  if (state.currentMode !== 'arrow' || !state.selectedFace || layerArrowOverlay.hidden) {
+    return;
+  }
+
+  const cubeBounds = getProjectedCubeBounds();
+
+  if (cubeBounds) {
+    updateLayerArrowOverlayLayout(layerArrowOverlay, cubeBounds);
+  }
+}
+
+function setFaceLock(face, options = {}) {
+  if (!face) {
+    state.faceViewLocked = false;
+    app.cancelViewTween();
+    return;
+  }
+
+  rubiksCube.group.rotation.set(...getFaceLockRotation(face));
+  state.faceViewLocked = true;
+  app.focusView(LOCKED_FRONT_VIEW, options);
+}
+
+function clearFaceLock() {
+  state.faceViewLocked = false;
+  app.cancelViewTween();
+}
+
+function handleFaceSelection(face) {
+  const nextFace = state.selectedFace === face ? null : face;
+
+  state.selectedFace = nextFace;
+
+  if (state.currentMode === 'arrow' && nextFace) {
+    setFaceLock(nextFace);
+  } else {
+    clearFaceLock();
+  }
+
+  state.status = getIdleStatusMessage();
+  syncIdleSpinState();
+  renderControls();
+}
+
+function handleModeChange(mode) {
+  if (mode === state.currentMode) {
+    return;
+  }
+
+  state.currentMode = mode;
+
+  if (mode === 'arrow' && state.selectedFace) {
+    setFaceLock(state.selectedFace);
+  } else {
+    clearFaceLock();
+  }
+
+  if (!state.isBusy) {
+    state.status = getIdleStatusMessage();
+  }
+
+  syncIdleSpinState();
+  renderControls();
+}
+
+function queuePlayerMoves(moves, labels) {
+  runQueuedAction(() => rubiksCube.queueMoves(moves), {
+    ...labels,
+    onSuccess: (completedMoves) => {
+      appendHistoryMoves(completedMoves);
+      clearSolveArtifacts();
+      labels.onSuccess?.(completedMoves);
+    },
+  });
 }
 
 function resizeRenderer() {
@@ -142,35 +306,59 @@ function resizeRenderer() {
   camera.aspect = width / Math.max(height, 1);
   camera.updateProjectionMatrix();
   renderer.setSize(width, height, false);
+  syncLayerArrowOverlayLayout();
 }
 
 // The controls are rendered from state each time so button enablement always matches camera/cube state.
 function renderControls() {
+  renderInteractionModeToggle(interactionMode, {
+    currentMode: state.currentMode,
+    onChange: handleModeChange,
+  });
+
   renderFaceSelector(faceSelector, {
     selectedFace: state.selectedFace,
     isBusy: state.isBusy,
-    onSelect: (face) => {
-      state.selectedFace = state.selectedFace === face ? null : face;
-      syncIdleSpinState();
-      renderControls();
-    },
+    onSelect: handleFaceSelection,
   });
 
-  renderDirectionalPad(directionalPad, {
-    selectedFace: state.selectedFace,
+  directionalPad.hidden = state.currentMode !== 'classic';
+
+  if (state.currentMode === 'classic') {
+    renderDirectionalPad(directionalPad, {
+      selectedFace: state.selectedFace,
+      isBusy: state.isBusy,
+      onTurn: (face, direction) => {
+        const move = direction === 'clockwise' ? face : `${face}'`;
+        queuePlayerMoves([move], {
+          busyStatus: `Turning ${move}`,
+          idleStatus: `Turned ${move}`,
+        });
+      },
+    });
+  } else {
+    directionalPad.innerHTML = '';
+  }
+
+  renderLayerArrowOverlay(layerArrowOverlay, {
+    controls:
+      state.currentMode === 'arrow' && state.selectedFace
+        ? getLayerArrowControls(state.selectedFace)
+        : [],
+    currentMode: state.currentMode,
+    cubeBounds:
+      state.currentMode === 'arrow' && state.selectedFace ? getProjectedCubeBounds() : null,
+    faceLabel: state.selectedFace ? FACE_LABELS[state.selectedFace] : '',
     isBusy: state.isBusy,
-    onTurn: (face, direction) => {
-      const move = direction === 'clockwise' ? face : `${face}'`;
-      runQueuedAction(() => rubiksCube.queueMove(move), {
-        busyStatus: `Turning ${move}`,
-        idleStatus: `Turned ${move}`,
-        onSuccess: (completedMoves) => {
-          appendHistoryMoves(completedMoves);
-          clearSolveArtifacts();
-        },
+    isLocked: state.faceViewLocked,
+    onArrow: (control) => {
+      queuePlayerMoves([control.move], {
+        busyStatus: `${control.tooltip} (${control.move})`,
+        idleStatus: `${control.tooltip} (${control.move}) complete.`,
       });
     },
   });
+  syncLayerArrowOverlayLayout();
 
   renderUtilityControls(utilityControls, {
     canRevert: Boolean(state.lastSolveSnapshot) && !state.isBusy,
@@ -406,6 +594,15 @@ function warmSolver() {
 }
 
 controls.addEventListener('start', () => {
+  if (state.currentMode === 'arrow' && state.faceViewLocked) {
+    clearFaceLock();
+    if (!state.isBusy) {
+      state.status = getIdleStatusMessage();
+    }
+
+    renderControls();
+  }
+
   state.isOrbiting = true;
   syncIdleSpinState();
 });
@@ -420,6 +617,7 @@ const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
   app.tick(Math.min(clock.getDelta(), 0.05));
+  syncLayerArrowOverlayLayout();
 }
 
 window.addEventListener('resize', resizeRenderer);

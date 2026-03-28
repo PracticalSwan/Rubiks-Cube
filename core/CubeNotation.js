@@ -53,10 +53,13 @@ const ROTATIONS = {
 
 const MOVE_ROTATIONS = {
   U: 'yn',
+  E: 'yp',
   D: 'yp',
   R: 'xn',
+  M: 'xp',
   L: 'xp',
   F: 'zn',
+  S: 'zn',
   B: 'zp',
 };
 
@@ -133,12 +136,18 @@ function isOnLayer(meta, move) {
       return meta.y === 1;
     case 'D':
       return meta.y === -1;
+    case 'E':
+      return meta.y === 0;
     case 'R':
       return meta.x === 1;
+    case 'M':
+      return meta.x === 0;
     case 'L':
       return meta.x === -1;
     case 'F':
       return meta.z === 1;
+    case 'S':
+      return meta.z === 0;
     case 'B':
       return meta.z === -1;
     default:
@@ -174,7 +183,7 @@ function applyQuarterTurn(facelets, move) {
 export function normalizeMove(move) {
   const token = `${move ?? ''}`.trim();
 
-  if (!/^[URFDLB](?:2|')?$/.test(token)) {
+  if (!/^[URFDLBMES](?:2|')?$/.test(token)) {
     throw new Error(`Unsupported move token "${move}"`);
   }
 

@@ -1,6 +1,13 @@
 import { expect, test } from 'vitest';
 
-import { FACE_LABELS, invertAlgorithm, simplifyAlgorithm } from '../../core/CubeNotation.js';
+import {
+  applyAlgorithmToFacelets,
+  applyMoveToFacelets,
+  FACE_LABELS,
+  invertAlgorithm,
+  simplifyAlgorithm,
+  SOLVED_FACELETS,
+} from '../../core/CubeNotation.js';
 
 // These tests protect the player-facing notation helpers that now drive the UI labels and solve text.
 test('FACE_LABELS maps internal face notation to human-readable color names', () => {
@@ -23,4 +30,12 @@ test('simplifyAlgorithm collapses redundant turns on the same face', () => {
 
 test('invertAlgorithm reverses order and inverts each move token', () => {
   expect(invertAlgorithm(['F', 'R2', "U'"])).toEqual(['U', 'R2', "F'"]);
+});
+
+test('notation helpers accept middle-slice moves for history-aware playback', () => {
+  expect(simplifyAlgorithm(['M', 'M'])).toEqual(['M2']);
+  expect(invertAlgorithm(['M', "E'", 'S2'])).toEqual(['S2', 'E', "M'"]);
+
+  expect(applyMoveToFacelets(SOLVED_FACELETS, 'M')).not.toBe(SOLVED_FACELETS);
+  expect(applyAlgorithmToFacelets(SOLVED_FACELETS, ['M', "M'"])).toBe(SOLVED_FACELETS);
 });

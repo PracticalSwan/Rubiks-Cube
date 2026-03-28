@@ -18,7 +18,10 @@
           <p class="eyebrow">Three.js Workshop</p>
           <h1>Spin it, scramble it, solve it.</h1>
         </div>
-        <div id="container3D" aria-label="Interactive Rubik's Cube scene"></div>
+        <div class="scene-stage">
+          <div id="container3D" aria-label="Interactive Rubik's Cube scene"></div>
+          <div id="layer-arrow-overlay" class="layer-arrow-overlay" hidden></div>
+        </div>
       </section>
 
       <!-- Each control section is populated by small UI render helpers at runtime. -->
@@ -32,6 +35,7 @@
           </p>
         </section>
 
+        <section class="panel-section" id="interaction-mode"></section>
         <section class="panel-section" id="face-selector"></section>
         <section class="panel-section" id="directional-pad"></section>
         <section class="panel-section" id="utility-controls"></section>

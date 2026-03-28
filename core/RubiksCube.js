@@ -14,10 +14,13 @@ import { MoveSet } from './MoveSet.js';
 // Move metadata converts notation into an axis, layer, and signed quarter-turn angle.
 const MOVE_CONFIG = {
   U: { axis: 'y', layer: 2, angleSign: -1 },
+  E: { axis: 'y', layer: 1, angleSign: 1 },
   D: { axis: 'y', layer: 0, angleSign: 1 },
   R: { axis: 'x', layer: 2, angleSign: -1 },
+  M: { axis: 'x', layer: 1, angleSign: 1 },
   L: { axis: 'x', layer: 0, angleSign: 1 },
   F: { axis: 'z', layer: 2, angleSign: -1 },
+  S: { axis: 'z', layer: 1, angleSign: -1 },
   B: { axis: 'z', layer: 0, angleSign: 1 },
 };
 

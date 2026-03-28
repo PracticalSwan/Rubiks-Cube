@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security reports
+    url: https://github.com/PracticalSwan/Rubiks-Cube/security/policy
+    about: Please report security issues through the SECURITY.md workflow instead of public issues.

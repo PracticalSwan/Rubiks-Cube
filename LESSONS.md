@@ -1,5 +1,17 @@
 # Lessons
 
+## 2026-03-28 - Canonical face locking and cube-centered overlays
+
+- If a face-lock feature starts from an auto-spinning presentation state, snapping only the camera is not enough; reset the cube's presentation rotation to a canonical pose first or the chosen color will drift away from the intended front view.
+- Overlay controls that are meant to hug a 3D object should follow projected object bounds, not a static container grid; the cube itself stays centered while the viewport shape changes.
+- Helper captions inside a constrained scene overlay can distort layout math more than they help; keep durable status messaging in the control rail when the overlay needs maximum space for controls.
+
+## 2026-03-28 - Face-locked slice controls
+
+- If a new control scheme still represents real cube moves, extend the shared notation and history layer first; letting `M`, `E`, and `S` ride the same queue as face turns kept solve planning and move playback consistent.
+- Face-locking a Rubik's Cube view is easier to maintain as a camera-pose concern than as ad-hoc DOM state, especially when OrbitControls, button-based zoom, and animation playback all need to coexist.
+- When a locked interaction mode can be manually escaped, model that unlock explicitly in app state so the UI can explain whether the face is still snapped forward or has been released by a drag gesture.
+
 ## 2026-03-26 - Orbit freedom, viewport fit, and repeated scrambles
 
 - If `OrbitControls` feels like vertical drag is "blocked," check `maxPolarAngle` before touching gesture handlers; a low polar cap can mimic a broken drag system even when pointer events are fine.

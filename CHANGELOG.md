@@ -4,6 +4,22 @@ All notable changes to this standalone cube project should be documented in this
 
 The format is based on Keep a Changelog and the project follows a simple date-based workshop history rather than strict releases.
 
+## [2026-03-28]
+
+### Added
+
+- A top-level interaction-mode toggle that switches between the existing classic face-turn controls and the new Layer Arrow Mode without resetting cube state.
+- A viewport-mounted 12-arrow overlay for Layer Arrow Mode so users can keep turning rows, columns, and middle slices without reselecting the face after every move.
+- Middle-slice notation support (`M`, `E`, `S`) plus dedicated tests so arrow-mode turns flow through the same move queue, history, and solve-planning pipeline as classic turns.
+- GitHub pull request and issue templates plus a CI workflow that runs `npm run verify` on pushes and pull requests.
+
+### Changed
+
+- Selecting a face in Layer Arrow Mode now rotates the cube into a true flat front view for the chosen color instead of inheriting the previous auto-spin angle, then keeps the view locked until the user drags the orbit controls or chooses a different face.
+- Classic mode now hides the arrow overlay, while Layer Arrow Mode hides the clockwise/counterclockwise pad so the active interaction affordance is always clear.
+- Camera handling now supports short face-focus transitions and manual drag-based unlocks without breaking zoom buttons, random scrambles, solve playback, or recorded move history.
+- The Layer Arrow overlay now positions itself from the cube's projected screen bounds, which keeps the arrow ring centered and responsive on narrower viewports.
+
 ## [2026-03-26]
 
 ### Added
