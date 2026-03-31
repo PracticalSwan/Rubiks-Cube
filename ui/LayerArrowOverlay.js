@@ -1,3 +1,4 @@
+// Overlay helpers keep the 2D arrow ring aligned with the projected cube instead of the viewport frame.
 import { escapeHtml } from './escapeHtml.js';
 
 function clamp(value, min, max) {

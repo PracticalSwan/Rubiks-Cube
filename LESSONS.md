@@ -1,5 +1,11 @@
 # Lessons
 
+## 2026-03-31 - Renderer lifecycle hardening and shared async recovery
+
+- If a Three.js canvas can be resized after startup or moved between displays, refresh both `renderer.setPixelRatio(...)` and `renderer.setSize(...)` from the same resize path; updating only size leaves the scene crisp at boot but blurry after DPI changes.
+- `renderer.setAnimationLoop(...)` can replace a manual `requestAnimationFrame(...)` wrapper without changing app-level tick logic, which keeps the render lifecycle aligned with current Three.js guidance and future renderer features.
+- When multiple async UI actions share the same busy-state contract, centralize the error-to-status cleanup in one helper; duplicate catch blocks drift quickly and make stop/scramble/solve failures feel inconsistent.
+
 ## 2026-03-28 - Live center-color selection and readable move copy
 
 - If the UI teaches face identity through colors, store the player's selection as the color identity and resolve notation faces from live center stickers on demand; middle-slice moves otherwise make the selector lie.

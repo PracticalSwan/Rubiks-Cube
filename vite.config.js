@@ -1,3 +1,4 @@
+// Vite prebundles the local solver package so dev and preview serve the same module graph reliably.
 import { defineConfig } from 'vite';
 
 export default defineConfig({

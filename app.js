@@ -21,18 +21,36 @@ import { renderInteractionModeToggle } from './ui/InteractionModeToggle.js';
 import { renderLayerArrowOverlay, updateLayerArrowOverlayLayout } from './ui/LayerArrowOverlay.js';
 import { renderUtilityControls } from './ui/UtilityControls.js';
 
+// Expose the runtime for Three.js DevTools and browser-level inspection workflows.
 globalThis.THREE = THREE;
 
-const container = document.getElementById('container3D');
-const faceSelector = document.getElementById('face-selector');
-const interactionMode = document.getElementById('interaction-mode');
-const layerArrowOverlay = document.getElementById('layer-arrow-overlay');
-const directionalPad = document.getElementById('directional-pad');
-const utilityControls = document.getElementById('utility-controls');
+const MAX_RENDER_DELTA_SECONDS = 0.05;
+const MAX_RENDER_PIXEL_RATIO = 2;
+
+function getRequiredElement(id) {
+  const element = document.getElementById(id);
+
+  if (!element) {
+    throw new Error(`Missing required app element: #${id}`);
+  }
+
+  return element;
+}
+
+function getRendererPixelRatio() {
+  return THREE.MathUtils.clamp(window.devicePixelRatio || 1, 1, MAX_RENDER_PIXEL_RATIO);
+}
+
+const container = getRequiredElement('container3D');
+const faceSelector = getRequiredElement('face-selector');
+const interactionMode = getRequiredElement('interaction-mode');
+const layerArrowOverlay = getRequiredElement('layer-arrow-overlay');
+const directionalPad = getRequiredElement('directional-pad');
+const utilityControls = getRequiredElement('utility-controls');
 // Scene and camera stay intentionally simple so the sticker colors are always read accurately.
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setPixelRatio(getRendererPixelRatio());
 container.appendChild(renderer.domElement);
 
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
@@ -350,6 +368,7 @@ function resizeRenderer() {
 
   camera.aspect = width / Math.max(height, 1);
   camera.updateProjectionMatrix();
+  renderer.setPixelRatio(getRendererPixelRatio());
   renderer.setSize(width, height, false);
   syncLayerArrowOverlayLayout();
 }
@@ -496,7 +515,27 @@ function finalizeIdleStatus(defaultStatus) {
   renderControls();
 }
 
-async function runQueuedAction(action, labels) {
+function handleActionFailure(error, options) {
+  state.isBusy = false;
+
+  const nextState = getActionErrorState(error, options);
+
+  if (nextState.shouldLog) {
+    console.error(error);
+  }
+
+  state.status = nextState.status;
+  syncIdleSpinState();
+  renderControls();
+}
+
+function getSolverReadyStatus() {
+  return state.selectedColor
+    ? getIdleStatusMessage()
+    : 'Solver ready. Choose a color to pause the demo spin.';
+}
+
+async function runQueuedAction(action, labels = {}) {
   if (state.isBusy) {
     return;
   }
@@ -511,18 +550,9 @@ async function runQueuedAction(action, labels) {
     labels.onSuccess?.(completedMoves);
     finalizeIdleStatus(labels.idleStatus);
   } catch (error) {
-    state.isBusy = false;
-    const nextState = getActionErrorState(error, {
+    handleActionFailure(error, {
       fallbackMessage: 'Action failed',
     });
-
-    if (nextState.shouldLog) {
-      console.error(error);
-    }
-
-    state.status = nextState.status;
-    syncIdleSpinState();
-    renderControls();
   }
 }
 
@@ -547,18 +577,9 @@ async function handleRandomize() {
     clearSolveArtifacts();
     finalizeIdleStatus('Random-state scramble complete. Choose a color to solve.');
   } catch (error) {
-    state.isBusy = false;
-    const nextState = getActionErrorState(error, {
+    handleActionFailure(error, {
       fallbackMessage: 'Random-state scramble failed',
     });
-
-    if (nextState.shouldLog) {
-      console.error(error);
-    }
-
-    state.status = nextState.status;
-    syncIdleSpinState();
-    renderControls();
   }
 }
 
@@ -610,40 +631,32 @@ async function handleSolve() {
     setHistoryMoves([]);
     finalizeIdleStatus(`Solve playback complete via ${plan.label}.`);
   } catch (error) {
-    state.isBusy = false;
-    const nextState = getActionErrorState(error, {
+    handleActionFailure(error, {
       fallbackMessage: 'Solve failed',
     });
-
-    if (nextState.shouldLog) {
-      console.error(error);
-    }
-
-    state.status = nextState.status;
-    syncIdleSpinState();
-    renderControls();
   }
 }
 
-function warmSolver() {
-  loadCubeClass()
-    .then((CubeClass) => {
-      solverEngine.setCubeClass(CubeClass);
-      return solverEngine.warmInIdle();
-    })
-    .then(() => {
-      state.solverReady = true;
+async function warmSolver() {
+  try {
+    const CubeClass = await loadCubeClass();
 
-      if (!state.isBusy) {
-        state.status = 'Solver ready. Choose a color to pause the demo spin.';
-        renderControls();
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      state.status = 'Solver failed to load';
+    solverEngine.setCubeClass(CubeClass);
+    await solverEngine.warmInIdle();
+    state.solverReady = true;
+
+    if (!state.isBusy) {
+      // If the user already selected a face before warmup finished, keep the
+      // contextual idle copy instead of resetting back to the generic prompt.
+      state.status = getSolverReadyStatus();
       renderControls();
-    });
+    }
+  } catch (error) {
+    console.error(error);
+    state.solverReady = false;
+    state.status = 'Solver failed to load';
+    renderControls();
+  }
 }
 
 controls.addEventListener('start', () => {
@@ -668,8 +681,7 @@ controls.addEventListener('end', () => {
 const clock = new THREE.Clock();
 
 function animate() {
-  requestAnimationFrame(animate);
-  app.tick(Math.min(clock.getDelta(), 0.05));
+  app.tick(Math.min(clock.getDelta(), MAX_RENDER_DELTA_SECONDS));
   syncLayerArrowOverlayLayout();
 }
 
@@ -677,5 +689,5 @@ window.addEventListener('resize', resizeRenderer);
 
 resizeRenderer();
 renderControls();
-warmSolver();
-animate();
+void warmSolver();
+renderer.setAnimationLoop(animate);

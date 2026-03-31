@@ -1,3 +1,4 @@
+// Notation tests protect the shared parsing and facelet helpers that every manual and solver move depends on.
 import { expect, test } from 'vitest';
 
 import {

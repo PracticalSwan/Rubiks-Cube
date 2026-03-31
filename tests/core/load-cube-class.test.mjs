@@ -1,3 +1,4 @@
+// Lazy-loader tests make sure the app caches the solver import instead of reloading it on every action.
 import { expect, test } from 'vitest';
 
 import { loadCubeClass } from '../../core/loadCubeClass.js';

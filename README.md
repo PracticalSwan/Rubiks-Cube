@@ -14,7 +14,7 @@ Mini Hands On Cube is a standalone Three.js Rubik's Cube app with color-based fa
 - Solver integration powered by `cubejs`.
 - State-aware solve planning that only reuses recorded history when it still matches the live cube state, and otherwise falls back to the `cubejs` solver so repeated random scrambles still solve cleanly.
 - Solve move playback that presents plain-language steps with notation as a secondary hint instead of raw notation alone.
-- Responsive layout that keeps the desktop shell inside the viewport while still stacking cleanly on tablet and mobile widths.
+- Responsive layout that keeps the desktop shell inside the viewport, refreshes the canvas for high-DPI resize changes, and still stacks cleanly on tablet and mobile widths.
 - Accessible status updates and visible keyboard focus styling for control flows.
 
 ## Quick Start

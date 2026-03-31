@@ -1,3 +1,4 @@
+// Layer-arrow tests verify the face-lock math that keeps row and column gestures deterministic.
 import { expect, test } from 'vitest';
 import { Euler, Vector3 } from 'three';
 

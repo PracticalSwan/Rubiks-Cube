@@ -1,3 +1,4 @@
+// Overlay layout tests guard the math that keeps the arrow ring centered around the rendered cube.
 import { expect, test } from 'vitest';
 
 import { computeLayerArrowLayout } from '../../ui/LayerArrowOverlay.js';

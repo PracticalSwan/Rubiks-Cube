@@ -1,3 +1,4 @@
+// Workflow tests pin the artifact and doc-guard helpers so contributor automation stays trustworthy.
 import { expect, test } from 'vitest';
 
 async function loadWorkflowLib() {

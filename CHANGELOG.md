@@ -4,6 +4,14 @@ All notable changes to this standalone cube project should be documented in this
 
 The format is based on Keep a Changelog and the project follows a simple date-based workshop history rather than strict releases.
 
+## [2026-03-31]
+
+### Changed
+
+- Refined the render loop to use Three.js renderer-managed animation timing and to refresh the renderer pixel ratio during resize, which keeps the cube crisp after viewport or display-density changes without changing gameplay.
+- Centralized async action-failure handling for manual turns, random scrambles, and solve playback so busy-state cleanup and status messaging stay consistent across the app shell.
+- Hardened app startup with required DOM mount checks and kept the solver warmup status contextual when a player picks a face before the solver finishes loading.
+
 ## [2026-03-28]
 
 ### Added

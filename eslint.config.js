@@ -1,3 +1,4 @@
+// Local lint rules stay project-scoped so workshop contributors get predictable feedback without extra tooling.
 import js from '@eslint/js';
 
 const commonGlobals = {

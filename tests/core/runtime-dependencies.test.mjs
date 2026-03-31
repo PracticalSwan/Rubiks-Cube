@@ -1,3 +1,4 @@
+// Runtime dependency checks fail fast if the app loses access to its core rendering or solver packages.
 import * as THREE from 'three';
 import { expect, test } from 'vitest';
 import Cube from 'cubejs-local';

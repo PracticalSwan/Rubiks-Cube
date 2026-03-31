@@ -1,3 +1,4 @@
+// Solve-planner coverage protects the history-versus-solver choice that drives playback UX.
 import { expect, test } from 'vitest';
 
 import { applyAlgorithmToFacelets, SOLVED_FACELETS } from '../../core/CubeNotation.js';

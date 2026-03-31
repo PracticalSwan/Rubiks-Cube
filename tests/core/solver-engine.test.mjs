@@ -1,3 +1,4 @@
+// Solver engine tests focus on warm-up caching and error mapping instead of the cubejs implementation itself.
 import { expect, test } from 'vitest';
 
 import { SolverEngine } from '../../core/SolverEngine.js';

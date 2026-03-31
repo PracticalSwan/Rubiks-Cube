@@ -1,3 +1,4 @@
+// The interaction toggle renders the current control scheme without coupling the UI to app-state internals.
 import { escapeHtml } from './escapeHtml.js';
 
 const MODES = [
