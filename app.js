@@ -8,7 +8,8 @@ import {
   getLiveColorFaceMap,
   simplifyAlgorithm,
 } from './core/CubeNotation.js';
-import { getFaceLockRotation, getLayerArrowControls } from './core/LayerArrowMode.js';
+import { resolveDragSolveMove } from './core/DragSolveMode.js';
+import { getFaceLockRotation, getFaceView, getLayerArrowControls } from './core/LayerArrowMode.js';
 import { getActionErrorState } from './core/appErrorState.js';
 import { RubiksCube } from './core/RubiksCube.js';
 import { loadCubeClass } from './core/loadCubeClass.js';
@@ -138,6 +139,22 @@ const projectedCubeCorners = [
   new THREE.Vector3(),
   new THREE.Vector3(),
 ];
+const raycaster = new THREE.Raycaster();
+const pointerNdc = new THREE.Vector2();
+const projectedAxisOrigin = new THREE.Vector3();
+const projectedAxisTip = new THREE.Vector3();
+const worldAxisVector = new THREE.Vector3();
+const dragSolveGesture = {
+  active: false,
+  cubiePosition: null,
+  face: null,
+  moveQueued: false,
+  pointerId: null,
+  projectedRight: null,
+  projectedUp: null,
+  startClientX: 0,
+  startClientY: 0,
+};
 
 const app = createRubiksCubeApp({
   rubiksCube,
@@ -149,7 +166,8 @@ const app = createRubiksCubeApp({
 });
 
 function syncIdleSpinState() {
-  state.idleSpinEnabled = !state.isBusy && !state.isOrbiting && !state.selectedColor;
+  state.idleSpinEnabled =
+    !state.isBusy && !state.isOrbiting && !state.selectedColor && state.currentMode !== 'drag';
 }
 
 function setHistoryMoves(nextMoves) {
@@ -197,6 +215,10 @@ function getSelectedFaceContext(facelets = getCurrentFacelets()) {
 function getIdleStatusMessage(fallbackMessage) {
   if (fallbackMessage) {
     return fallbackMessage;
+  }
+
+  if (state.currentMode === 'drag') {
+    return 'Drag a sticker to turn a row or column. Drag the empty space around the cube to orbit.';
   }
 
   const selectedFaceContext = getSelectedFaceContext();
@@ -271,6 +293,196 @@ function getProjectedCubeBounds() {
   };
 }
 
+function projectWorldPointToScreen(worldPoint) {
+  const width = renderer.domElement.clientWidth || container.clientWidth;
+  const height = renderer.domElement.clientHeight || container.clientHeight;
+
+  if (!width || !height) {
+    return null;
+  }
+
+  projectedAxisOrigin.copy(worldPoint).project(camera);
+
+  return {
+    x: (projectedAxisOrigin.x * 0.5 + 0.5) * width,
+    y: (-projectedAxisOrigin.y * 0.5 + 0.5) * height,
+  };
+}
+
+function getProjectedFaceAxes(face, worldOrigin) {
+  const view = getFaceView(face);
+  const origin = projectWorldPointToScreen(worldOrigin);
+
+  if (!origin) {
+    return null;
+  }
+
+  worldAxisVector
+    .set(...view.rightDirection)
+    .applyQuaternion(rubiksCube.group.quaternion)
+    .normalize();
+  projectedAxisTip.copy(worldOrigin).add(worldAxisVector);
+  const rightTip = projectWorldPointToScreen(projectedAxisTip);
+
+  worldAxisVector
+    .set(...view.upDirection)
+    .applyQuaternion(rubiksCube.group.quaternion)
+    .normalize();
+  projectedAxisTip.copy(worldOrigin).add(worldAxisVector);
+  const upTip = projectWorldPointToScreen(projectedAxisTip);
+
+  if (!rightTip || !upTip) {
+    return null;
+  }
+
+  return {
+    projectedRight: {
+      x: rightTip.x - origin.x,
+      y: rightTip.y - origin.y,
+    },
+    projectedUp: {
+      x: upTip.x - origin.x,
+      y: upTip.y - origin.y,
+    },
+  };
+}
+
+function getDragSolveHit(event) {
+  const bounds = renderer.domElement.getBoundingClientRect();
+
+  if (!bounds.width || !bounds.height) {
+    return null;
+  }
+
+  pointerNdc.set(
+    ((event.clientX - bounds.left) / bounds.width) * 2 - 1,
+    -((event.clientY - bounds.top) / bounds.height) * 2 + 1
+  );
+  raycaster.setFromCamera(pointerNdc, camera);
+
+  const hit = raycaster
+    .intersectObjects(
+      rubiksCube.cubies.map((cubie) => cubie.mesh),
+      false
+    )
+    .find(
+      (intersection) =>
+        intersection.object?.userData?.cubie &&
+        Number.isInteger(intersection.face?.materialIndex) &&
+        materialFaces[intersection.face.materialIndex]
+    );
+
+  if (!hit) {
+    return null;
+  }
+
+  const face = materialFaces[hit.face.materialIndex];
+  const projectedAxes = getProjectedFaceAxes(face, hit.point);
+
+  if (!projectedAxes) {
+    return null;
+  }
+
+  return {
+    cubiePosition: { ...hit.object.userData.cubie.currentPosition },
+    face,
+    projectedRight: projectedAxes.projectedRight,
+    projectedUp: projectedAxes.projectedUp,
+  };
+}
+
+function clearDragSolveGesture() {
+  if (dragSolveGesture.pointerId !== null) {
+    try {
+      if (renderer.domElement.hasPointerCapture?.(dragSolveGesture.pointerId)) {
+        renderer.domElement.releasePointerCapture(dragSolveGesture.pointerId);
+      }
+    } catch {
+      // Pointer capture can already be gone by the time cleanup runs.
+    }
+  }
+
+  dragSolveGesture.active = false;
+  dragSolveGesture.cubiePosition = null;
+  dragSolveGesture.face = null;
+  dragSolveGesture.moveQueued = false;
+  dragSolveGesture.pointerId = null;
+  dragSolveGesture.projectedRight = null;
+  dragSolveGesture.projectedUp = null;
+  dragSolveGesture.startClientX = 0;
+  dragSolveGesture.startClientY = 0;
+  controls.enabled = true;
+}
+
+function handleDragSolvePointerDown(event) {
+  if (state.currentMode !== 'drag' || state.isBusy || !event.isPrimary) {
+    return;
+  }
+
+  const hit = getDragSolveHit(event);
+
+  if (!hit) {
+    return;
+  }
+
+  dragSolveGesture.active = true;
+  dragSolveGesture.cubiePosition = hit.cubiePosition;
+  dragSolveGesture.face = hit.face;
+  dragSolveGesture.moveQueued = false;
+  dragSolveGesture.pointerId = event.pointerId;
+  dragSolveGesture.projectedRight = hit.projectedRight;
+  dragSolveGesture.projectedUp = hit.projectedUp;
+  dragSolveGesture.startClientX = event.clientX;
+  dragSolveGesture.startClientY = event.clientY;
+  controls.enabled = false;
+  renderer.domElement.setPointerCapture?.(event.pointerId);
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function handleDragSolvePointerMove(event) {
+  if (!dragSolveGesture.active || dragSolveGesture.pointerId !== event.pointerId) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (dragSolveGesture.moveQueued || state.isBusy) {
+    return;
+  }
+
+  const move = resolveDragSolveMove({
+    cubiePosition: dragSolveGesture.cubiePosition,
+    dragDelta: {
+      x: event.clientX - dragSolveGesture.startClientX,
+      y: event.clientY - dragSolveGesture.startClientY,
+    },
+    face: dragSolveGesture.face,
+    projectedRight: dragSolveGesture.projectedRight,
+    projectedUp: dragSolveGesture.projectedUp,
+  });
+
+  if (!move) {
+    return;
+  }
+
+  dragSolveGesture.moveQueued = true;
+  queuePlayerMoves([move], {
+    busyStatus: `Turning dragged layer (${move})`,
+  });
+}
+
+function handleDragSolvePointerEnd(event) {
+  if (!dragSolveGesture.active || dragSolveGesture.pointerId !== event.pointerId) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+  clearDragSolveGesture();
+}
+
 function syncLayerArrowOverlayLayout() {
   if (state.currentMode !== 'arrow' || !state.selectedColor || layerArrowOverlay.hidden) {
     return;
@@ -321,6 +533,10 @@ function handleFaceSelection(face) {
 function handleModeChange(mode) {
   if (mode === state.currentMode) {
     return;
+  }
+
+  if (dragSolveGesture.active) {
+    clearDragSolveGesture();
   }
 
   state.currentMode = mode;
@@ -389,6 +605,7 @@ function renderControls() {
     isBusy: state.isBusy,
     onSelect: handleFaceSelection,
   });
+  faceSelector.hidden = state.currentMode === 'drag';
 
   directionalPad.hidden = state.currentMode !== 'classic';
 
@@ -530,6 +747,10 @@ function handleActionFailure(error, options) {
 }
 
 function getSolverReadyStatus() {
+  if (state.currentMode === 'drag') {
+    return getIdleStatusMessage();
+  }
+
   return state.selectedColor
     ? getIdleStatusMessage()
     : 'Solver ready. Choose a color to pause the demo spin.';
@@ -677,6 +898,20 @@ controls.addEventListener('end', () => {
   state.isOrbiting = false;
   syncIdleSpinState();
 });
+
+renderer.domElement.addEventListener('pointerdown', handleDragSolvePointerDown, true);
+renderer.domElement.addEventListener('pointermove', handleDragSolvePointerMove, true);
+renderer.domElement.addEventListener('pointerup', handleDragSolvePointerEnd, true);
+renderer.domElement.addEventListener('pointercancel', handleDragSolvePointerEnd, true);
+renderer.domElement.addEventListener(
+  'lostpointercapture',
+  (event) => {
+    if (dragSolveGesture.active && dragSolveGesture.pointerId === event.pointerId) {
+      clearDragSolveGesture();
+    }
+  },
+  true
+);
 
 const clock = new THREE.Clock();
 

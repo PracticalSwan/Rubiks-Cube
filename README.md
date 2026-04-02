@@ -1,12 +1,13 @@
 # Mini Hands On Cube
 
-Mini Hands On Cube is a standalone Three.js Rubik's Cube app with color-based face controls, true random-state scrambles, and solver-assisted recovery.
+Mini Hands On Cube is a standalone Three.js Rubik's Cube app with direct drag solving, color-based face controls, true random-state scrambles, and solver-assisted recovery.
 
 ## Features
 
 - Interactive 3x3x3 Rubik's Cube scene.
 - Free orbit drag around the cube, including full vertical pitch, while zoom stays on explicit `-` and `+` buttons.
-- A mode toggle that switches between Classic Face Turn Mode and Layer Arrow Mode without resetting the cube.
+- A mode toggle that switches between Classic Face Turn Mode, Drag Solve Mode, and Layer Arrow Mode without resetting the cube.
+- Drag Solve Mode that lets you drag visible stickers to turn rows or columns while reserving the empty space around the cube for whole-view orbiting.
 - Live center-color face selection, so `Blue` always means the face whose center sticker is blue right now.
 - Classic mode with color-first clockwise/counterclockwise face turns that follow the live center-color mapping.
 - Layer Arrow Mode with automatic flat face locking, persistent 12-arrow overlays that stay centered on the cube, row/column slice turns, and lock-follow behavior when the selected center moves to a new face.
@@ -74,20 +75,22 @@ npm run format
 ## How To Use
 
 1. Let the cube idle-spin until you are ready to solve.
-2. Choose a center color from the face selector to pause the demo spin.
-3. Pick `Classic Face Turn Mode` when you want the existing clockwise and counterclockwise direction pad.
-4. The selector always follows live centers, so if a middle-slice move shifts the blue center to the top face, the `Blue` button updates to `currently on the top face`.
-5. Pick `Layer Arrow Mode` when you want the selected center color rotated into a flat 2D front view with 12 persistent row and column arrows centered around the cube.
-6. In Layer Arrow Mode, the lock follows the selected center color after slice moves so the chosen color stays in front; drag the scene once if you want to release that lock and orbit freely again.
-7. Select a different color anytime you want the cube snapped to that live center again.
-8. Use utility controls when needed.
-9. `Randomize` creates a true random-state scramble and animates it.
-10. `Solve` computes a recovery sequence, preferring the shorter of the solver output or the inverse of your recorded move history only when that history still matches the live cube state.
-11. `Show moves` reveals a readable numbered move list for the last solve, with standard notation kept as a secondary hint.
-12. `Revert solve` restores the cube to the state it had right before the last solve playback.
-13. `Stop` cancels active playback safely without leaving the app in a stuck state.
-14. `Reset` returns to solved state instantly.
-15. Drag the scene to orbit freely around the cube, and use `-` / `+` when you want to change camera distance.
+2. Pick `Drag Solve Mode` when you want the `onlinecube.com`-style interaction split.
+3. In Drag Solve Mode, drag a visible sticker to turn its row or column, and drag the empty space around the cube when you want to orbit the whole view instead.
+4. Choose a center color from the face selector when you want the targeted controls used by Classic Face Turn Mode or Layer Arrow Mode.
+5. Pick `Classic Face Turn Mode` when you want the existing clockwise and counterclockwise direction pad.
+6. The selector always follows live centers, so if a middle-slice move shifts the blue center to the top face, the `Blue` button updates to `currently on the top face`.
+7. Pick `Layer Arrow Mode` when you want the selected center color rotated into a flat 2D front view with 12 persistent row and column arrows centered around the cube.
+8. In Layer Arrow Mode, the lock follows the selected center color after slice moves so the chosen color stays in front; drag the scene once if you want to release that lock and orbit freely again.
+9. Select a different color anytime you want the cube snapped to that live center again.
+10. Use utility controls when needed.
+11. `Randomize` creates a true random-state scramble and animates it.
+12. `Solve` computes a recovery sequence, preferring the shorter of the solver output or the inverse of your recorded move history only when that history still matches the live cube state.
+13. `Show moves` reveals a readable numbered move list for the last solve, with standard notation kept as a secondary hint.
+14. `Revert solve` restores the cube to the state it had right before the last solve playback.
+15. `Stop` cancels active playback safely without leaving the app in a stuck state.
+16. `Reset` returns to solved state instantly.
+17. Use `-` / `+` when you want to change camera distance.
 
 Status text reports current app state: `warming`, `idle`, `scrambling`, `solving`, `solved`, or `error`.
 

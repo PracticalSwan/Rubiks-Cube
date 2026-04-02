@@ -58,7 +58,7 @@ export function renderUtilityControls(container, props) {
         } aria-label="Zoom in">+</button>
       </div>
       <p class="zoom-copy">
-        Zoom is button-only so wheel and touch stay focused on orbiting the cube.
+        Zoom is button-only so wheel and touch stay out of the way of cube drags and orbiting.
       </p>
     </div>
     ${

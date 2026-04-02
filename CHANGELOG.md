@@ -4,6 +4,19 @@ All notable changes to this standalone cube project should be documented in this
 
 The format is based on Keep a Changelog and the project follows a simple date-based workshop history rather than strict releases.
 
+## [2026-04-02]
+
+### Added
+
+- A third top-level interaction mode, `Drag Solve Mode`, that lets players solve by dragging visible stickers instead of relying only on button-based turn controls.
+- Dedicated drag-resolution tests in `tests/core/drag-solve-mode.test.mjs` so sticker-hit rows, columns, and gesture directions stay deterministic as the app evolves.
+
+### Changed
+
+- Drag Solve Mode now claims pointer drags that start on the cube itself while leaving empty-space drags to `OrbitControls`, which matches the interaction split from `onlinecube.com`.
+- Drag Solve Mode hides the face selector and other mode-specific turn affordances while active, so the control rail only shows the controls that still matter in that interaction model.
+- Utility copy now explains that zoom buttons keep wheel and touch input free for cube drags and orbiting instead of implying orbit-only interaction.
+
 ## [2026-03-31]
 
 ### Changed

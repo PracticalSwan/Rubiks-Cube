@@ -8,6 +8,11 @@ const MODES = [
     copy: 'Keep the existing face selector plus clockwise and counterclockwise turns.',
   },
   {
+    value: 'drag',
+    label: 'Drag Solve Mode',
+    copy: 'Drag a sticker to turn a layer, or drag the empty space around the cube to orbit.',
+  },
+  {
     value: 'arrow',
     label: 'Layer Arrow Mode',
     copy: 'Lock a selected face forward and drive rows or columns with 12 persistent arrows.',

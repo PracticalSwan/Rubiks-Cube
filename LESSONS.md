@@ -1,5 +1,11 @@
 # Lessons
 
+## 2026-04-02 - Drag solve pointer ownership
+
+- If one canvas gesture sometimes means "turn a layer" and sometimes means "orbit the camera," decide ownership on pointer-down; letting orbit and drag-solving compete after movement starts makes the control feel random.
+- A sticker-drag mode can reuse the same notation pipeline as overlay arrows if you classify the hit cubie into face-local rows and columns, then resolve drag direction against the face's projected right/up vectors.
+- For browser verification of direct-manipulation 3D controls, a visible move counter is a practical assertion surface: it lets you distinguish a successful cube turn from a view-only orbit without instrumenting the whole renderer.
+
 ## 2026-03-31 - Renderer lifecycle hardening and shared async recovery
 
 - If a Three.js canvas can be resized after startup or moved between displays, refresh both `renderer.setPixelRatio(...)` and `renderer.setSize(...)` from the same resize path; updating only size leaves the scene crisp at boot but blurry after DPI changes.
