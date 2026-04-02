@@ -31,6 +31,8 @@ export class Cubie {
       this.mesh.rotation.y = 0;
       this.mesh.rotation.z = 0;
     }
+
+    this.mesh.updateMatrix?.();
   }
 
   setPosition(position) {

@@ -107,6 +107,7 @@ export function createRubiksCubeApp({
     canZoomOut: () => getDistance() < controls.maxDistance - 0.05,
     cancelViewTween,
     focusView,
+    isViewTweening: () => Boolean(viewTween),
     zoomIn: () => setDistance(getDistance() * 0.84),
     zoomOut: () => setDistance(getDistance() * 1.18),
   };

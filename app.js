@@ -1,5 +1,19 @@
 // Main browser entrypoint that wires the Three.js scene, solver services, and DOM controls together.
-import * as THREE from 'three';
+import {
+  Box3,
+  BoxGeometry,
+  Clock,
+  EdgesGeometry,
+  Group,
+  LineBasicMaterial,
+  MathUtils,
+  PerspectiveCamera,
+  Raycaster,
+  Scene,
+  Vector2,
+  Vector3,
+  WebGLRenderer,
+} from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {
   FACE_COLORS,
@@ -15,6 +29,7 @@ import { RubiksCube } from './core/RubiksCube.js';
 import { loadCubeClass } from './core/loadCubeClass.js';
 import { SolverEngine } from './core/SolverEngine.js';
 import { chooseSolvePlan } from './core/SolvePlanner.js';
+import { createCubieMeshFactory } from './core/createCubieMeshFactory.js';
 import { createRubiksCubeApp } from './core/createRubiksCubeApp.js';
 import { renderDirectionalPad } from './ui/DirectionalPad.js';
 import { renderFaceSelector } from './ui/FaceSelector.js';
@@ -22,8 +37,9 @@ import { renderInteractionModeToggle } from './ui/InteractionModeToggle.js';
 import { renderLayerArrowOverlay, updateLayerArrowOverlayLayout } from './ui/LayerArrowOverlay.js';
 import { renderUtilityControls } from './ui/UtilityControls.js';
 
-// Expose the runtime for Three.js DevTools and browser-level inspection workflows.
-globalThis.THREE = THREE;
+if (import.meta.env.DEV) {
+  void import('./core/exposeThreeDevtools.js');
+}
 
 const MAX_RENDER_DELTA_SECONDS = 0.05;
 const MAX_RENDER_PIXEL_RATIO = 2;
@@ -39,7 +55,7 @@ function getRequiredElement(id) {
 }
 
 function getRendererPixelRatio() {
-  return THREE.MathUtils.clamp(window.devicePixelRatio || 1, 1, MAX_RENDER_PIXEL_RATIO);
+  return MathUtils.clamp(window.devicePixelRatio || 1, 1, MAX_RENDER_PIXEL_RATIO);
 }
 
 const container = getRequiredElement('container3D');
@@ -49,12 +65,12 @@ const layerArrowOverlay = getRequiredElement('layer-arrow-overlay');
 const directionalPad = getRequiredElement('directional-pad');
 const utilityControls = getRequiredElement('utility-controls');
 // Scene and camera stay intentionally simple so the sticker colors are always read accurately.
-const scene = new THREE.Scene();
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const scene = new Scene();
+const renderer = new WebGLRenderer({ antialias: true, alpha: true });
 renderer.setPixelRatio(getRendererPixelRatio());
 container.appendChild(renderer.domElement);
 
-const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+const camera = new PerspectiveCamera(45, 1, 0.1, 100);
 camera.position.set(7.6, 6.3, 8.5);
 
 // OrbitControls remain active for drag rotation, but zoom is button-driven only.
@@ -69,38 +85,26 @@ controls.maxPolarAngle = Math.PI;
 controls.update();
 
 // Flat materials remove lighting-based tint shifts and make sticker colors match the UI labels.
-const cubieGeometry = new THREE.BoxGeometry(0.94, 0.94, 0.94);
-const edgeGeometry = new THREE.EdgesGeometry(cubieGeometry);
-const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x07111c });
+const cubieGeometry = new BoxGeometry(0.94, 0.94, 0.94);
+const edgeGeometry = new EdgesGeometry(cubieGeometry);
+const edgeMaterial = new LineBasicMaterial({ color: 0x07111c });
 const materialFaces = ['R', 'L', 'U', 'D', 'F', 'B'];
 
 function getStickerColor(sticker) {
   return FACE_COLORS[sticker] ?? '#0f1726';
 }
 
-function createCubieMesh(stickers) {
-  const materials = materialFaces.map(
-    (face) =>
-      new THREE.MeshBasicMaterial({
-        color: getStickerColor(stickers[face]),
-      })
-  );
-  const mesh = new THREE.Mesh(cubieGeometry, materials);
-  const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
-
-  mesh.add(edges);
-  mesh.userData.applyStickers = (nextStickers) => {
-    materialFaces.forEach((face, index) => {
-      mesh.material[index].color.set(getStickerColor(nextStickers[face]));
-    });
-  };
-
-  return mesh;
-}
+const createCubieMesh = createCubieMeshFactory({
+  cubieGeometry,
+  edgeGeometry,
+  edgeMaterial,
+  materialFaces,
+  getStickerColor,
+});
 
 const rubiksCube = new RubiksCube({
   createMesh: createCubieMesh,
-  createGroup: () => new THREE.Group(),
+  createGroup: () => new Group(),
   animationDuration: 0.16,
 });
 scene.add(rubiksCube.group);
@@ -127,23 +131,23 @@ const LOCKED_FRONT_VIEW = {
   eyeDirection: [0, 0, 1],
   upDirection: [0, 1, 0],
 };
-const projectedCubeBounds = new THREE.Box3();
-const projectedCorner = new THREE.Vector3();
+const projectedCubeBounds = new Box3();
+const projectedCorner = new Vector3();
 const projectedCubeCorners = [
-  new THREE.Vector3(),
-  new THREE.Vector3(),
-  new THREE.Vector3(),
-  new THREE.Vector3(),
-  new THREE.Vector3(),
-  new THREE.Vector3(),
-  new THREE.Vector3(),
-  new THREE.Vector3(),
+  new Vector3(),
+  new Vector3(),
+  new Vector3(),
+  new Vector3(),
+  new Vector3(),
+  new Vector3(),
+  new Vector3(),
+  new Vector3(),
 ];
-const raycaster = new THREE.Raycaster();
-const pointerNdc = new THREE.Vector2();
-const projectedAxisOrigin = new THREE.Vector3();
-const projectedAxisTip = new THREE.Vector3();
-const worldAxisVector = new THREE.Vector3();
+const raycaster = new Raycaster();
+const pointerNdc = new Vector2();
+const projectedAxisOrigin = new Vector3();
+const projectedAxisTip = new Vector3();
+const worldAxisVector = new Vector3();
 const dragSolveGesture = {
   active: false,
   cubiePosition: null,
@@ -898,6 +902,11 @@ controls.addEventListener('end', () => {
   state.isOrbiting = false;
   syncIdleSpinState();
 });
+controls.addEventListener('change', () => {
+  if (state.currentMode === 'arrow' && !layerArrowOverlay.hidden) {
+    syncLayerArrowOverlayLayout();
+  }
+});
 
 renderer.domElement.addEventListener('pointerdown', handleDragSolvePointerDown, true);
 renderer.domElement.addEventListener('pointermove', handleDragSolvePointerMove, true);
@@ -913,11 +922,17 @@ renderer.domElement.addEventListener(
   true
 );
 
-const clock = new THREE.Clock();
+const clock = new Clock();
 
 function animate() {
   app.tick(Math.min(clock.getDelta(), MAX_RENDER_DELTA_SECONDS));
-  syncLayerArrowOverlayLayout();
+  if (
+    state.currentMode === 'arrow' &&
+    !layerArrowOverlay.hidden &&
+    (state.isBusy || app.isViewTweening())
+  ) {
+    syncLayerArrowOverlayLayout();
+  }
 }
 
 window.addEventListener('resize', resizeRenderer);

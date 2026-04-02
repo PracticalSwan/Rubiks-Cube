@@ -16,6 +16,9 @@ The format is based on Keep a Changelog and the project follows a simple date-ba
 - Drag Solve Mode now claims pointer drags that start on the cube itself while leaving empty-space drags to `OrbitControls`, which matches the interaction split from `onlinecube.com`.
 - Drag Solve Mode hides the face selector and other mode-specific turn affordances while active, so the control rail only shows the controls that still matter in that interaction model.
 - Utility copy now explains that zoom buttons keep wheel and touch input free for cube drags and orbiting instead of implying orbit-only interaction.
+- Production builds now keep the full `three` namespace behind a dev-only devtools helper, which cut the main JavaScript chunk from `762.88 kB` to `536.02 kB` before gzip without changing the local inspection workflow.
+- Cubie faces now reuse a shared `MeshBasicMaterial` palette and manual local-matrix updates, which reduced live material instances from `163` to `8` while preserving the existing sticker-color behavior.
+- Layer Arrow overlay layout sync now runs only while the cube or camera is actually moving, instead of staying on a permanent per-frame update path when the face-locked view is already still.
 
 ## [2026-03-31]
 

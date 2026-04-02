@@ -1,5 +1,12 @@
 # Lessons
 
+## 2026-04-02 - Bundle hygiene and static-scene hot paths
+
+- If browser tooling needs `window.THREE`, expose the full namespace only in development; keeping that bridge in the production entrypoint can hold a much larger Three.js bundle in place than the shipped runtime actually uses.
+- When dozens of cube faces differ only by flat sticker color, reuse a small material palette and swap material references instead of mutating hundreds of near-identical materials one by one.
+- For cubie meshes that only change position or rotation at discrete checkpoints, disable `matrixAutoUpdate` and call `updateMatrix()` when those transforms change instead of paying the local-matrix cost every frame.
+- For DOM overlays driven by projected 3D bounds, trigger layout sync from real movement signals such as active tweens, cube turns, or camera-change events rather than keeping the projection math on a permanent idle loop.
+
 ## 2026-04-02 - Drag solve pointer ownership
 
 - If one canvas gesture sometimes means "turn a layer" and sometimes means "orbit the camera," decide ownership on pointer-down; letting orbit and drag-solving compete after movement starts makes the control feel random.
@@ -78,7 +85,7 @@
 ## 2026-03-25 - Rubik's Cube solver implementation
 
 - Keep the cube state renderer-agnostic in `core/` so notation, move math, queueing, and solver orchestration stay testable without a browser canvas.
-- Let `app.js` own the browser edge: Three.js imports, local `cubejs` browser scripts, DOM wiring, and `window.THREE` exposure for tooling.
+- Let the app edge own browser-only concerns such as Three.js imports, DOM wiring, and devtools exposure, even if the tooling bridge later moves into a small development-only helper.
 - A shared quarter-turn queue keeps manual turns, random scrambles, and solver playback visually consistent and makes `Stop` behavior easier to reason about.
 - Local browser verification should come before deeper scene inspection so console noise, missing assets, and layout regressions are ruled out early.
 - Three.js DevTools belongs at the app edge as a runtime inspection tool; when the MCP bridge is available it should confirm scene tree, renderer state, and screenshots rather than replacing source-level tests.

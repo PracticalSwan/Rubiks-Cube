@@ -70,7 +70,7 @@ npm run format
 
 - `three` is bundled from the local npm dependency through Vite instead of a CDN import.
 - The solver ships as the local file dependency `cubejs-local` under `vendor/cubejs` and loads lazily through [`core/loadCubeClass.js`](./core/loadCubeClass.js).
-- `window.THREE` remains exposed so Playwright and Three.js DevTools can inspect the live scene during debugging.
+- `window.THREE` is exposed only in development through a dev-only helper so Playwright and Three.js DevTools can inspect the live scene without inflating the production bundle.
 
 ## How To Use
 
