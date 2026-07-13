@@ -25,8 +25,8 @@ This folder holds contributor-only session material for `Mini_Hands_On_Cube`. Ke
 
 - `prepare` installs Husky hooks after `npm install`.
 - `post-checkout` and `post-merge` remind contributors to start a fresh session deliberately.
-- `pre-commit` blocks commits that change runtime or workflow files without the matching `CHANGELOG.md` and `LESSONS.md` updates.
-- `pre-push` runs `npm run verify` so the workflow scripts and lightweight tests stay healthy.
+- `pre-commit` runs `npm run workflow:guard` as an advisory hook. Run `npm run workflow:guard` directly when you need a blocking check before committing.
+- `pre-push` runs `npm run verify` as an advisory hook. Run `npm run verify` directly before publishing or when you need a blocking verification pass.
 
 ## Folder Map
 

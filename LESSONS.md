@@ -1,5 +1,13 @@
 # Lessons
 
+## 2026-07-14 - The repo root is the project root; never nest the app into a subfolder
+
+- This project deploys and runs from the repository root: `app.js`, `index.html`, `style.css`, `vite.config.js`, `package.json`, `core/`, `ui/`, `vendor/cubejs/`, `scripts/`, and `tests/` are all top-level. Vite's entry, every relative import, the `"cubejs-local": "file:vendor/cubejs"` dependency, and the `node ./scripts/*.mjs` npm scripts all resolve from root. Moving any of those into a nested folder (e.g. a stray `Mini_Hands_On_Cube/`) breaks the build, the solver dependency, and every workflow script at once.
+- A partial directory move leaves a telltale `git status` signature: a block of `D` (deleted) entries for the moved paths plus one `??` untracked folder holding those same paths. When the app suddenly fails to build or run, check `git status` first instead of guessing at imports.
+- Restore from the known-good commit with `git restore <dirs>` rather than hand-copying files; the committed `HEAD` is the state already deployed to GitHub and Vercel, so a local working-tree break usually needs no push, only a local restore.
+- A directory move often corrupts `node_modules` too (missing `vite`/`three`, a dangling `cubejs-local` symlink). After restoring source paths, run `npm install` to reconcile dependencies and re-link the local solver before re-checking the build.
+- Do not confuse a broken local working tree with a broken deployment. GitHub and Vercel serve the committed `HEAD`; verify with `git ls-remote origin` and only treat the remote as broken if local `HEAD` and `origin/HEAD` actually diverge.
+
 ## 2026-04-02 - Bundle hygiene and static-scene hot paths
 
 - If browser tooling needs `window.THREE`, expose the full namespace only in development; keeping that bridge in the production entrypoint can hold a much larger Three.js bundle in place than the shipped runtime actually uses.

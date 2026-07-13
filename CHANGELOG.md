@@ -4,6 +4,12 @@ All notable changes to this standalone cube project should be documented in this
 
 The format is based on Keep a Changelog and the project follows a simple date-based workshop history rather than strict releases.
 
+## [2026-06-08]
+
+### Changed
+
+- Clarified contributor workflow docs that Husky `pre-commit` and `pre-push` hooks are advisory wrappers; direct `npm run workflow:guard` and `npm run verify` remain the commands to run when a blocking local check is needed.
+
 ## [2026-04-02]
 
 ### Added
